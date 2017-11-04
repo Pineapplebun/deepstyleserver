@@ -1,4 +1,4 @@
-# deepstylewebapp
+# Deep Style Web App
 
 ## Current Progress: Step 1 and 2.
 
