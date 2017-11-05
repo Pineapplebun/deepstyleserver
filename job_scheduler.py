@@ -1,4 +1,4 @@
-import Queue, time, sqlite3, logging
+import Queue, time, sqlite3, logging, os
 from subprocess import Popen
 
 """
@@ -97,11 +97,14 @@ class job_scheduler(object):
         if not gpu_free.is_empty():
             job_to_run = job_queue.get()
             job_to_run.gpu = gpu_free.get()
+
+            # Create a copy of the environemnt
+            new_env = os.environ.copy()
+            new_env['CUDA_VISIBLE_DEVICES'] = str(job_to_run.gpu)
             # Run the subprocess
             job_to_run.proc = Popen(['python', 'neural_style.py', '--content',
             '%s' % job_to_run.path1, '--styles', <style file>, '--output',
-            '%s' % job_to_run.path],
-            env={"CUDA_VISIBLE_DEVICES" : str(job_to_run.gpu)})
+            '%s' % job_to_run.path], env=new_env)
 
             # Append the job to the running_job list
             running_procs.append(job_to_run)
