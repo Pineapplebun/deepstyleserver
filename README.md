@@ -11,6 +11,17 @@ How to safely exit out of job scheduling?
 
 Start thinking about creating docker image and DL/UL for the website.
 
+## Running the program
+
+We need to run the script run_server.sh in order to have docker and nvidia
+libraries installed in the AWS instance. This script will also automatically
+start the app if it succeeds. If these dependencies have already been installed
+and the docker container has already been build, then we can just run:
+
+nvidia-docker run -p 80:80 -d -it deepstyleapp sh /app/start_app_wrapper.sh
+
+to start the app.
+
 ## Structure
 
 The web app consists of:

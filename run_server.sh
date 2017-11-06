@@ -27,10 +27,9 @@ nvidia-docker run — rm nvidia/cuda nvidia-smi
 
 
 # Build Docker Container and run it
-# assuming that we are using /var/www/html
-# as the folder for apache
+# -p is port, -d is detach, -it is interactive terminal
 # CPU and web server: docker run -p 80:80 -v /..folder../src/:/var/www/html
 # I think we need to change docker to nvidia-docker
 # If we need to leverage gpu
 nvidia-docker build -t deepstyleapp .
-nvidia-docker run -it -p 80:80 deepstyleapp
+nvidia-docker run -p 80:80 -d -it deepstyleapp sh /app/start_app_wrapper.sh
