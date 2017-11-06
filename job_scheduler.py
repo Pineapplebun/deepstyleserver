@@ -1,4 +1,4 @@
-import Queue, time, sqlite3, logging, os
+import Queue, sqlite3, logging, os, sys
 from subprocess import Popen
 
 """
@@ -8,6 +8,8 @@ path to file
 content weight
 style weight
 etc...
+
+gpu: int
 """
 class job(object):
     def __init__(self, entry_id, absolute_path_to_image1, absolute_path_to_image2, output_path, content_weight, style_weight):
@@ -143,5 +145,5 @@ class job_scheduler(object):
 
 
 if __name__ == '__main__':
-    js = job_scheduler()
+    js = job_scheduler(num_gpus =sys.argv[1], name_db=sys.argv[2])
     js.main()
