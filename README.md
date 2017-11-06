@@ -1,6 +1,6 @@
 # Deep Style Web App
 
-## Current Progress: Step 1 and 2.
+## Current Progress: Step 1, 2, 3, 4, 5
 
 ## NOTES
 Need to change tensorflow script to allow_soft_placement = TRUE to automatically
@@ -29,11 +29,11 @@ The web app consists of:
 1. Django backend with a (SQLite?) database
 2. Python job scheduling script
 3. Input/Output in Frontend and Backend
-4. Connecting tensorflow version of Neural Style Transfer
-5. Docker instructions file
+4. Dataflow for Neural Style Transfer
+5. Docker installation and dependencies
 
-## Fahim
+## Fahim (1, 3, 4)
 Django backend
 
-## Kevin
+## Kevin (2, 4, 5)
 Job scheduling
