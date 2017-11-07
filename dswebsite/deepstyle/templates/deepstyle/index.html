@@ -1,0 +1,5 @@
+<ul>
+	{% for job in all_jobs %}
+	<li><a href="/deepstyle/{{ job.id }}/">{{ job.job_name }}</a></li>
+	{% endfor %}
+</ul>
