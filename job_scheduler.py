@@ -105,8 +105,8 @@ class job_scheduler(object):
             new_env['CUDA_VISIBLE_DEVICES'] = str(job_to_run.gpu)
             # Run the subprocess
             job_to_run.proc = Popen(['python', 'neural_style.py', '--content',
-            '%s' % job_to_run.path1, '--styles', <style file>, '--output',
-            '%s' % job_to_run.path], env=new_env)
+            '%s' % job_to_run.path1, '--styles', '%s' % job_to_run.path2, '--output',
+            '%s' % job_to_run.out], env=new_env)
 
             # Append the job to the running_job list
             running_procs.append(job_to_run)
