@@ -1,6 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse
-from django.template import loader
+from django.http import Http404
 from .models import Image, Job
 
 # Create your views here.
@@ -11,19 +10,24 @@ def index(request):
 
     #querying and templating results from the database
     all_jobs = Job.objects.all()
-    template = loader.get_template('deepstyle/index.html')
+    for job in all_jobs:
+        print (job.job_name)
+        
     context = {
         'all_jobs' : all_jobs,
     }
 
-    return HttpResponse(template.render(context, request))
-
-    # sample html without template
-    # for job in all_jobs:
-    #     url = '/deepstyle/' + str(job.id)
-    #     html += '<a href="' + url + '">' + job.job_name + '</a><br>'
-    # return HttpResponse(html)
+    return render(request, 'deepstyle/index.html', context)
 
 # project/deepstyle/job_id
-def job_detail(request, job_id):
-    return HttpResponse('<h1>Job ID: ' + str(job_id) + '</h1>')
+def job_details(request, job_id):
+    try:
+        job = Job.objects.get(pk=job_id)
+    except Job.DoesNotExist:
+        raise Http404("A job with ID " + job_id + " does not exist")
+
+    context = {
+        'job' : job,
+    }
+
+    return render(request, 'deepstyle/job_details.html', context)

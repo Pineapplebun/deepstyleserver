@@ -4,6 +4,7 @@ from datetime import datetime
 # Image model for holding the image
 class Image(models.Model):
     image_name = models.CharField(max_length = 500)
+    image_description = models.TextField(default="Just another image")
     image_path = models.FileField()
 
     # image type
@@ -15,29 +16,20 @@ class Image(models.Model):
     )
     image_type = models.CharField(max_length = 1, choices = IMAGE_TYPE_OPTIONS, default = INPUT_IMAGE) # TOFIX: have only "input" as option for the user
 
+    # string repr. of the class
+    def __str__(self):
+        return self.image_name
+
+
 # Job model using image from
 class Job(models.Model):
     # basic inputs for the job
     job_name = models.CharField(max_length = 200)
     job_description = models.TextField(default="Just another deepstyle job")
-    #input_image_path = models.CharField(max_length = 1000) #use foreign key later
-    #style_image_path = models.CharField(max_length = 1000) #use foreign key later
-    #output_image_path = models.CharField(max_length = 1000) #use foreign key later
-    input_image_path = models.ForeignKey(
-        Image,
-        models.SET_NULL,
-        blank = True,
-        null = True,
-        related_name='+'
-    )
-    style_image_path = models.ForeignKey(
-        Image,
-        models.SET_NULL,
-        blank = True,
-        null = True,
-        related_name='+'
-    )
-    output_image_path = models.ForeignKey(
+
+    input_image = models.ForeignKey(Image, blank = False, null = "False", related_name='+')
+    style_image = models.ForeignKey(Image, blank = False, null = "False",  related_name='+')
+    output_image = models.ForeignKey(
         Image,
         models.SET_NULL,
         blank = True,
@@ -47,7 +39,7 @@ class Job(models.Model):
 
 
     # parameters for running a job
-    output_width = models.PositiveSmallIntegerField() #add a limit?
+    output_width = models.PositiveSmallIntegerField() # TOFIX: add a limit?
     iterations = models.PositiveIntegerField(default = 2000) # TOFIX: default is 2000?
     content_weight = models.FloatField() # TOFIX: Find the default
     style_weight = models.FloatField() # TOFIX: Find the default
