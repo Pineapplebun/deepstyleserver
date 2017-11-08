@@ -1,10 +1,12 @@
 <h1>{{ job.id }} : {{ job.job_name }}</h1>
 
 <h3>Input Image</h3>
-<!-- <img src="{{ job.input_image.image_path }}" alt="" width="100px" height="100px">
- -->
+<img src="{{ job.input_image.image_path.url }}" alt="" width="100px" height="100px">
+
 <h3>Style Image</h3>
 <img src="#" alt="">
 
 <h3>Output Image</h3>
 <img src="#" alt="">
+
+<a href="{% url 'deepstyle:EditJob' job.id %}">Edit job name and details</a>

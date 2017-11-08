@@ -2,8 +2,8 @@
 {% if all_jobs %}
 	<ul>
 		{% for job in all_jobs %}
-
 		<li><a href="{% url 'deepstyle:detail' job.id %}">{{ job.job_name }}</a></li>
+		<a href="{% url 'deepstyle:DeleteJob' job.id %}">Delete the job</a>
 		{% endfor %}
 	</ul>
 

@@ -1,5 +1,6 @@
 from django.views import generic
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.core.urlresolvers import reverse_lazy
 from .models import Job
 
 class IndexView(generic.ListView):
@@ -16,3 +17,11 @@ class DetailView(generic.DetailView):
 class CreateJob(CreateView):
     model = Job
     fields = ['job_name', 'job_description', 'input_image', 'output_width', 'content_weight', 'pooling']
+
+class EditJob(UpdateView):
+    model = Job
+    fields = ['job_name', 'job_description']
+
+class DeleteJob(DeleteView):
+    model = Job
+    success_url = reverse_lazy('deepstyle:index')
