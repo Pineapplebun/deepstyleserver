@@ -1,5 +1,6 @@
 from django.db import models
 from datetime import datetime
+from django.core.urlresolvers import reverse
 
 # Image model for holding the image
 class Image(models.Model):
@@ -14,7 +15,7 @@ class Image(models.Model):
         (INPUT_IMAGE, "Input"),
         (OUTPUT_IMAGE, "Output")
     )
-    image_type = models.CharField(max_length = 1, choices = IMAGE_TYPE_OPTIONS, default = INPUT_IMAGE, default = INPUT_IMAGE)
+    image_type = models.CharField(max_length = 1, choices = IMAGE_TYPE_OPTIONS, default = INPUT_IMAGE)
 
     # string repr. of the class
     def __str__(self):
@@ -72,6 +73,9 @@ class Job(models.Model):
     job_start = models.DateTimeField(blank = True, null = True)
     job_completed = models.DateTimeField(blank = True, null = True)
 
+    # currently returning to the job list page
+    def get_absolute_url(self):
+        return reverse('deepstyle:index', kwargs = None)
 
     # string repr. of the class
     def __str__(self):
