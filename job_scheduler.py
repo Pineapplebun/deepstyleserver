@@ -4,21 +4,47 @@ from subprocess import Popen
 """
 A job that contains information about the POST request.
 Required information:
-path to file
-content weight
-style weight
-etc...
 
-gpu: int
+job_id : int
+path1 : str
+path2 : str
+out : str
+content_weight : float
+content_blend : float
+style_weight : float
+style_scale : float
+style_layer_weight_exp : float
+preserve_color : bool
+
 """
 class job(object):
-    def __init__(self, entry_id, absolute_path_to_image1, absolute_path_to_image2, output_path, content_weight, style_weight):
+    def __init__(self,
+                 entry_id,
+                 path_to_im1,
+                 path_to_im2,
+                 output_path,
+                 content_weight,
+                 content_blend,
+                 style_weight,
+                 style_scale,
+                 style_layer_weight_exp,
+                 preserve_colors):
+        
         self.job_id = entry_id
-        self.path1 = absolute_path_to_image1
-        self.path2 = absolute_path_to_image2
+        self.path1 = path_to_im1
+        self.path2 = path_to_im2
         self.out = output_path
         self.content_weight = content_weight
+        self.content_blend = content_blend
         self.style_weight = style_weight
+        self.style_scale = style_scale
+        self.style_layer_weight_exp = style_layer_weight_exp
+        self.preserve_colors = preserve_colors
+
+        if (iterations < 5000):
+            self.iterations = iterations
+        else:
+            self.iterations = 5000
         self.gpu = None
         self.proc = None
         self.finished = None
@@ -75,10 +101,21 @@ class job_scheduler(object):
         """
         c = self.db.cursor()
         new_job_exists = False
-        for row in c.execute("SELECT * FROM jobs WHERE status='unqueued'"):
-            job_queue.put(job(row[0], row[1], row[2], row[3], row[4], row[5], row[6]))
+        for row in c.execute("SELECT * FROM jobs WHERE status='Queued'"):
+            job_queue.put(job(entry_id=row['job_name'],
+                              path_to_im1=row['input_image'],
+                              path_to_im2=row['style_image'],
+                              output_path=row['output_image'],
+                              content_weight=row['content_weight'],
+                              content_blend=row['content_weight_blend'],
+                              style_weight=row['style_weight'],
+                              style_scale=row['style_scale'],
+                              style_layer_weight_exp=row['style_layer_weight_exp'],
+                              iterations=row['iterations'],
+                              preserve_colors=row['preserve_colors'])
+                          )
             # Set queue status of current row's id to be 'queued'
-            c.execute("UPDATE jobs set status = 'queued' WHERE rowid = %s" % (row[0],))
+            c.execute("UPDATE jobs SET status='In Progress' WHERE job_name = %s" % row['job_name'])
             new_job_exists = True
         c.close()
         if new_job_exists:
@@ -103,10 +140,27 @@ class job_scheduler(object):
             # Create a copy of the environemnt
             new_env = os.environ.copy()
             new_env['CUDA_VISIBLE_DEVICES'] = str(job_to_run.gpu)
+
+            # set preserve colors if indicated
+            if job_to_run.preserve_colors:
+                preserve = ''
+            else:
+                preserve = '--preserve-colors'
+            
             # Run the subprocess
-            job_to_run.proc = Popen(['python', 'neural_style.py', '--content',
-            '%s' % job_to_run.path1, '--styles', '%s' % job_to_run.path2, '--output',
-            '%s' % job_to_run.out], env=new_env)
+            job_to_run.proc = Popen(['python',
+                                     'neural_style.py',
+                                     '--content', '%s' % job_to_run.path1,
+                                     '--styles', '%s' % job_to_run.path2,
+                                     '--output','%s' % job_to_run.out,
+                                     '--content-weight', % job_to_run.content_weight,
+                                     '--content-weight-blend', job_to_run.content_blend,
+                                     '--style-weight', job_to_run.style_weight,
+                                     '--style-layer-weight-exp', job_to_run.style_layer_weight_exp,
+                                     '--style-scales', job_to_run.style_scale,
+                                     '--iterations', job_to_run.iterations,
+                                     '%s' % preserve, 
+                                     ], env=new_env)
 
             # Append the job to the running_job list
             running_procs.append(job_to_run)
@@ -132,16 +186,25 @@ class job_scheduler(object):
             # we can check if any requests are made and then create jobs from
             # them and we can check if any jobs are waiting. GPU bound.
             completed_job = None
+            c = self.db.cursor()
             for job_i in running_jobs:
                 exit_code = job_i.proc.poll()
                 if exit_code is not None:
                     completed_job = running_procs.remove(job_i)
                     gpu_free.put(completed_job.gpu)
+
+                    # Change status of job in database
+                    c.execute("UPDATE jobs SET status='Completed' WHERE job_name = %s" % row['job_name'])
+                    
                     self.logger.info(job_i)
                     break
-
+            
             if exit_code != 0 and completed_job is not None:
+                c.execute("UPDATE jobs SET status='Failed' WHERE job_name = %s" % row['job_name'])
                 self.logger.error(job_i)
+
+            # close cursor
+            c.close()
 
 
 if __name__ == '__main__':
