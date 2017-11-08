@@ -1,0 +1,5 @@
+<form action="" method = "post" enctype = "multipart/form-data">
+	{% csrf_token %}
+	{% include 'deepstyle/form-template.html' %}
+	<button type="submit">Submit</button>
+</form>

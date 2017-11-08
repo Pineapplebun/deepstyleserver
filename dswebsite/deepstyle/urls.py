@@ -11,5 +11,5 @@ urlpatterns = [
     url(r'^(?P<pk>[0-9]+)/$', views.DetailView.as_view(), name='detail'),
 
     # url for adding new job
-    url(r'^addjob/$', views.job_create.as_view(), name='job_create')
+    url(r'^createjob/$', views.CreateJob.as_view(), name='CreateJob')
 ]
