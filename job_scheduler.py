@@ -108,8 +108,8 @@ class job_scheduler(object):
         """
         c = self.db.cursor()
         new_job_exists = False
-        for row in c.execute("SELECT * FROM jobs WHERE status='Queued'"):
-            job_queue.put(job(entry_id=row['job_name'],
+        for row in c.execute("SELECT * FROM deepstyle_job WHERE job_status='Queued'"):
+            self.job_queue.put(job(entry_id=c.lastrowid,
                               path_to_im1=row['input_image'].image_path.url,
                               path_to_im2=row['style_image'].image_path.url,
                               output_path=row['output_image'].image_path.url,
@@ -122,7 +122,7 @@ class job_scheduler(object):
                               preserve_colors=row['preserve_colors'])
                           )
             # Set queue status of current row's id to be 'queued'
-            c.execute("UPDATE jobs SET status='In Progress' WHERE job_name = %s" % row['job_name'])
+            c.execute("UPDATE deepstyle_job SET status='In Progress' WHERE rowid = %d" % c.lastrowid)
             new_job_exists = True
         c.close()
         if new_job_exists:
@@ -140,8 +140,8 @@ class job_scheduler(object):
         NOTE: NEED TO CHANGE THE TENSORFLOW EVALUATE SCRIPT TO ALLOW
         SOFT PLACEMENT IN THE SESSION.
         """
-        if not gpu_free.is_empty():
-            job_to_run = job_queue.get()
+        if not gpu_free.empty():
+            job_to_run = self.job_queue.get()
             job_to_run.gpu = gpu_free.get()
 
             # Create a copy of the environemnt
@@ -173,7 +173,7 @@ class job_scheduler(object):
             # Append the job to the running_job list
             running_procs.append(job_to_run)
 
-    def main():
+    def main(self):
         """
         Create a pool of processes equivalent to the number of gpus
         Need async multiprocessing here...
@@ -184,8 +184,8 @@ class job_scheduler(object):
             self.create_jobs_and_queue()
 
             # When a job exists in the job queue
-            if not job_queue.is_empty():
-                while not gpu_free.is_empty():
+            if not self.job_queue.empty():
+                while not gpu_free.empty():
                     self.assign_gpu_and_run()
 
             # Check the processes that are running
@@ -195,68 +195,28 @@ class job_scheduler(object):
             # them and we can check if any jobs are waiting. GPU bound.
             completed_job = None
             c = self.db.cursor()
-            for job_i in running_jobs:
+            exit_code = 0
+            for job_i in self.running_jobs:
                 exit_code = job_i.proc.poll()
                 if exit_code is not None:
                     completed_job = running_procs.remove(job_i)
                     gpu_free.put(completed_job.gpu)
 
                     # Change status of job in database
-                    c.execute("UPDATE jobs SET status='Completed' WHERE job_name = %s" % row['job_name'])
+                    c.execute("UPDATE deepstyle_job SET job_status='Completed' WHERE rowid = %s" % c.lastrowid)
 
                     self.logger.info(job_i)
                     break
 
             if exit_code != 0 and completed_job is not None:
-                c.execute("UPDATE jobs SET status='Failed' WHERE job_name = %s" % row['job_name'])
+                c.execute("UPDATE deepstyle_job SET job_status='Failed' WHERE rowid = %s" % c.lastrowid)
                 self.logger.error(job_i)
 
             # close cursor
             c.close()
 
-
-## HELPER FUNCTIONS
-def create_job(conn, jobs):
-    """
-    Create a new project into the projects table
-    :param conn:
-    :param project:
-    :return: project id
-    """
-    sql = ''' INSERT INTO jobs(
-                 entry_id,
-                 path_to_im1,
-                 path_to_im2,
-                 output_path,
-                 content_weight,
-                 content_blend,
-                 style_weight,
-                 style_scale,
-                 style_layer_weight_exp,
-                 iterations,
-                 preserve_colors)
-              VALUES(?,?,?,?,?,?,?,?,?,?,?) '''
-    cur = conn.cursor()
-    cur.execute(sql, jobs)
-    return cur.lastrowid
-
 if __name__ == '__main__':
 
     js = job_scheduler(num_gpus=int(sys.argv[1]), name_db=sys.argv[2])
-
-    # Simulate a job entry
-    job1 = (1,
-            "/app/test/dog.jpg",
-            "/app/test/cat.jpg",
-            "/app/test_out/dogcat.jpg",
-            5e0,
-            1,
-            5e2,
-            1.0,
-            1,
-            1000,
-            True)
-
-    create_job(js.db, job1)
 
     js.main()
