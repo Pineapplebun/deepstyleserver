@@ -28,8 +28,9 @@ class job(object):
                  style_weight,
                  style_scale,
                  style_layer_weight_exp,
+                 iterations,
                  preserve_colors):
-        
+
         self.job_id = entry_id
         self.path1 = path_to_im1
         self.path2 = path_to_im2
@@ -88,7 +89,13 @@ class job_scheduler(object):
         self.gpu_free = Queue.Queue()
         self.running_jobs = []
         self.job_queue = Queue.Queue()
-        self.db = sqlite3.connect(name_db)
+
+        try:
+            self.db = sqlite3.connect(name_db)
+        except Error as e:
+            print(e)
+            sys.exit()
+
         # Assuming that the gpu ranges from 0 to num_gpus - 1
         # gpu_0, gpu_1, etc.
         for i in range(num_gpus):
@@ -103,9 +110,9 @@ class job_scheduler(object):
         new_job_exists = False
         for row in c.execute("SELECT * FROM jobs WHERE status='Queued'"):
             job_queue.put(job(entry_id=row['job_name'],
-                              path_to_im1=row['input_image'],
-                              path_to_im2=row['style_image'],
-                              output_path=row['output_image'],
+                              path_to_im1=row['input_image'].image_path.url,
+                              path_to_im2=row['style_image'].image_path.url,
+                              output_path=row['output_image'].image_path.url,
                               content_weight=row['content_weight'],
                               content_blend=row['content_weight_blend'],
                               style_weight=row['style_weight'],
@@ -146,7 +153,7 @@ class job_scheduler(object):
                 preserve = ''
             else:
                 preserve = '--preserve-colors'
-            
+
             # Run the subprocess
             job_to_run.proc = Popen(['python',
                                      'neural_style.py',
@@ -159,7 +166,7 @@ class job_scheduler(object):
                                      '--style-layer-weight-exp', job_to_run.style_layer_weight_exp,
                                      '--style-scales', job_to_run.style_scale,
                                      '--iterations', job_to_run.iterations,
-                                     '%s' % preserve, 
+                                     '%s' % preserve,
                                      ], env=new_env)
 
             # Append the job to the running_job list
@@ -195,10 +202,10 @@ class job_scheduler(object):
 
                     # Change status of job in database
                     c.execute("UPDATE jobs SET status='Completed' WHERE job_name = %s" % row['job_name'])
-                    
+
                     self.logger.info(job_i)
                     break
-            
+
             if exit_code != 0 and completed_job is not None:
                 c.execute("UPDATE jobs SET status='Failed' WHERE job_name = %s" % row['job_name'])
                 self.logger.error(job_i)
@@ -207,6 +214,48 @@ class job_scheduler(object):
             c.close()
 
 
+## HELPER FUNCTIONS
+def create_job(conn, jobs):
+    """
+    Create a new project into the projects table
+    :param conn:
+    :param project:
+    :return: project id
+    """
+    sql = ''' INSERT INTO jobs(
+                 entry_id,
+                 path_to_im1,
+                 path_to_im2,
+                 output_path,
+                 content_weight,
+                 content_blend,
+                 style_weight,
+                 style_scale,
+                 style_layer_weight_exp,
+                 iterations,
+                 preserve_colors)
+              VALUES(?,?,?,?,?,?,?,?,?,?,?) '''
+    cur = conn.cursor()
+    cur.execute(sql, project)
+    return cur.lastrowid
+
 if __name__ == '__main__':
-    js = job_scheduler(num_gpus =sys.argv[1], name_db=sys.argv[2])
+
+    js = job_scheduler(num_gpus=sys.argv[1], name_db=sys.argv[2])
+
+    # Simulate a job entry
+    job1 = (1,
+            "/app/test/dog.jpg",
+            "/app/test/cat.jpg",
+            "/app/test_out/dogcat.jpg",
+            5e0,
+            1,
+            5e2,
+            1.0,
+            1,
+            1000,
+            True)
+
+    create_job(js.db, job1)
+
     js.main()
