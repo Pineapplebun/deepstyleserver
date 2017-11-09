@@ -113,8 +113,11 @@ class job_scheduler(object):
         # checking
         if len(c.fetchall()) == 0:
             print("cannot find any jobs")
+        else:
+            print(c.fetchall())
 
         for row in ROWS:
+            print("inside row in create")
             self.job_queue.put(job(entry_id=c.lastrowid,
                               path_to_im1=row['input_image'].image_path.url,
                               path_to_im2=row['style_image'].image_path.url,
@@ -133,7 +136,9 @@ class job_scheduler(object):
             new_job_exists = True
             self.logger.log.info("Job %d set In Progress" % c.lastrowid)
             print("ran create")
+
         c.close()
+
         if new_job_exists:
             self.db.commit()
 
@@ -196,6 +201,7 @@ class job_scheduler(object):
 
             # When a job exists in the job queue
             if not self.job_queue.empty():
+                print("job queue is not empty")
                 while not gpu_free.empty():
                     self.assign_gpu_and_run()
 
