@@ -108,15 +108,13 @@ class job_scheduler(object):
         """
         c = self.db.cursor()
         new_job_exists = False
-        ROWS = c.execute("SELECT * FROM deepstyle_job WHERE job_status='Q'")
+        c.execute("SELECT * FROM deepstyle_job WHERE job_status='Q'")
 
         # checking
-        if len(c.fetchall()) == 0:
-            print("cannot find any jobs")
-        else:
-            print(c.fetchall())
+        #if len(c.fetchall()) == 0:
+        #    print("cannot find any jobs")
 
-        for row in ROWS:
+        for row in c.fetchall():
             print("inside row in create")
             self.job_queue.put(job(entry_id=c.lastrowid,
                               path_to_im1=row['input_image'].image_path.url,
