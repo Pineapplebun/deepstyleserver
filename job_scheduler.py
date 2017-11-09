@@ -173,7 +173,7 @@ class job_scheduler(object):
             # Append the job to the running_job list
             running_procs.append(job_to_run)
 
-    def main():
+    def main(self):
         """
         Create a pool of processes equivalent to the number of gpus
         Need async multiprocessing here...
