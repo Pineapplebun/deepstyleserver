@@ -209,6 +209,7 @@ class job_scheduler(object):
                     break
 
             if exit_code != 0 and completed_job is not None:
+                print("Error in Popen")
                 c.execute("UPDATE deepstyle_job SET job_status='Failed' WHERE rowid = %s" % c.lastrowid)
                 self.logger.error(job_i)
 
