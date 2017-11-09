@@ -108,7 +108,7 @@ class job_scheduler(object):
         """
         c = self.db.cursor()
         new_job_exists = False
-        for row in c.execute("SELECT * FROM deepstyle_job WHERE status='Queued'"):
+        for row in c.execute("SELECT * FROM deepstyle_job WHERE job_status='Queued'"):
             job_queue.put(job(entry_id=c.lastrowid,
                               path_to_im1=row['input_image'].image_path.url,
                               path_to_im2=row['style_image'].image_path.url,
@@ -202,13 +202,13 @@ class job_scheduler(object):
                     gpu_free.put(completed_job.gpu)
 
                     # Change status of job in database
-                    c.execute("UPDATE deepstyle_job SET status='Completed' WHERE rowid = %s" % c.lastrowid)
+                    c.execute("UPDATE deepstyle_job SET job_status='Completed' WHERE rowid = %s" % c.lastrowid)
 
                     self.logger.info(job_i)
                     break
 
             if exit_code != 0 and completed_job is not None:
-                c.execute("UPDATE deepstyle_job SET status='Failed' WHERE rowid = %s" % c.lastrowid)
+                c.execute("UPDATE deepstyle_job SET job_status='Failed' WHERE rowid = %s" % c.lastrowid)
                 self.logger.error(job_i)
 
             # close cursor
