@@ -116,12 +116,19 @@ class job_scheduler(object):
         #    print("cannot find any jobs")
         row = c.fetchone()
         while row is not None:
-            print(row.keys())
             """
-            self.job_queue.put(job(entry_id=c.lastrowid,
-                              path_to_im1=row['input_image_id'].image_path.url,
-                              path_to_im2=row['style_image_id'].image_path.url,
-                              output_path=row['output_image_id'].image_path.url,
+            print(row.keys())
+            
+            s = self.db.cursor()
+            
+            input_row = s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['input_image_id'])
+            input_row_path = input_row['image_path'] 
+
+            """
+            self.job_queue.put(job(entry_id=row['id'],
+                              path_to_im1=row['input_image_path'],
+                              path_to_im2=row['style_image_path'],
+                              output_path=row['output_image_path'],
                               content_weight=row['content_weight'],
                               content_blend=row['content_weight_blend'],
                               style_weight=row['style_weight'],
@@ -131,7 +138,7 @@ class job_scheduler(object):
                               preserve_colors=row['preserve_colors'])
                           )
 
-            """
+            
             # Set queue status of current row's id to be 'queued'
             c.execute("UPDATE deepstyle_job SET job_status='P' WHERE rowid = %d" % row['id'])
             new_job_exists = True
