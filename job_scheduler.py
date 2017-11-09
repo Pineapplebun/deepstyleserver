@@ -58,8 +58,8 @@ class logger(object):
     Create a logger and write to console and file.
     """
     def __init__(self):
-        self.logger = logging.getLogger()
-        self.logger.setLevel(logging.DEBUG)
+        self.log = logging.getLogger()
+        self.log.setLevel(logging.DEBUG)
         # create console handler and set level to debug
         self.ch = logging.StreamHandler()
         self.ch.setLevel(logging.DEBUG)
@@ -124,6 +124,7 @@ class job_scheduler(object):
             # Set queue status of current row's id to be 'queued'
             c.execute("UPDATE deepstyle_job SET status='In Progress' WHERE rowid = %d" % c.lastrowid)
             new_job_exists = True
+            self.logger.log.info("Job %d set In Progress" % c.lastrowid)
         c.close()
         if new_job_exists:
             self.db.commit()
@@ -170,6 +171,7 @@ class job_scheduler(object):
                                      '%s' % preserve
                                      ], env=new_env)
 
+            self.logger.log.info("Job %d assigned GPU %d." % (job_to_run.job_id, job_to_run.gpu))
             # Append the job to the running_job list
             running_procs.append(job_to_run)
 
@@ -182,7 +184,7 @@ class job_scheduler(object):
             # When a new job exists in the database, create a job and load
             # into the job queue.
             self.create_jobs_and_queue()
-            print("going")
+
             # When a job exists in the job queue
             if not self.job_queue.empty():
                 while not gpu_free.empty():
@@ -205,13 +207,13 @@ class job_scheduler(object):
                     # Change status of job in database
                     c.execute("UPDATE deepstyle_job SET job_status='Completed' WHERE rowid = %s" % c.lastrowid)
 
-                    self.logger.info(job_i)
+                    self.logger.log.info(job_i)
                     break
 
             if exit_code != 0 and completed_job is not None:
                 print("Error in Popen")
                 c.execute("UPDATE deepstyle_job SET job_status='Failed' WHERE rowid = %s" % c.lastrowid)
-                self.logger.error(job_i)
+                self.logger.log.error(job_i)
 
             # close cursor
             c.close()
