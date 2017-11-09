@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 class Image(models.Model):
     image_name = models.CharField(max_length = 500)
     image_description = models.TextField(default = "Just another image")
-    image_path = models.FileField()
+    image_file = models.FileField()
 
     # image type
     INPUT_IMAGE = 'I'
@@ -28,7 +28,9 @@ class Job(models.Model):
     job_name = models.CharField(max_length = 200)
     job_description = models.TextField(default="Just another deepstyle job")
 
-    input_image = models.ForeignKey(Image, blank = False, null = "False", related_name='+')
+    # input_image = models.ForeignKey(Image, blank = False, null = "False", related_name='+')
+    input_image = models.FileField(blank = False, null = "False")
+
     style_image = models.ForeignKey(Image, blank = False, null = "False",  related_name='+')
     output_image = models.ForeignKey(
         Image,
@@ -37,7 +39,6 @@ class Job(models.Model):
         null = True,
         related_name='+'
     )
-
 
     # parameters for running a job
     # TOFIX: add more restricted limit to each param?
