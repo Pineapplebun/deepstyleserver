@@ -216,14 +216,14 @@ class job_scheduler(object):
 
 
 ## HELPER FUNCTIONS
-def create_job(conn, job):
+def create_job(conn, Job):
     """
     Create a new project into the projects table
     :param conn:
     :param project:
     :return: project id
     """
-    sql = ''' INSERT INTO job(
+    sql = ''' INSERT INTO Job(
                  entry_id,
                  path_to_im1,
                  path_to_im2,
@@ -237,7 +237,7 @@ def create_job(conn, job):
                  preserve_colors)
               VALUES(?,?,?,?,?,?,?,?,?,?,?) '''
     cur = conn.cursor()
-    cur.execute(sql, job)
+    cur.execute(sql, Job)
     return cur.lastrowid
 
 if __name__ == '__main__':
