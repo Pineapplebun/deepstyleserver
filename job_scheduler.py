@@ -1,4 +1,4 @@
-import Queue, sqlite3, logging, os, sys
+import queue, sqlite3, logging, os, sys
 from subprocess import Popen
 
 """
@@ -86,20 +86,20 @@ class job_scheduler(object):
     def __init__(self, num_gpus, name_db):
         self.logger = logger()
         self.num_gpus = num_gpus
-        self.gpu_free = Queue.Queue()
+        self.gpu_free = queue.Queue()
         self.running_jobs = []
-        self.job_queue = Queue.Queue()
+        self.job_queue = queue.Queue()
 
         try:
             self.db = sqlite3.connect(name_db)
-        except Error as e:
+        except Exception as e:
             print(e)
             sys.exit()
 
         # Assuming that the gpu ranges from 0 to num_gpus - 1
         # gpu_0, gpu_1, etc.
         for i in range(num_gpus):
-            gpu_free.put(i)
+            self.gpu_free.put(i)
 
     def create_jobs_and_queue(self):
         """
@@ -149,6 +149,7 @@ class job_scheduler(object):
             new_env['CUDA_VISIBLE_DEVICES'] = str(job_to_run.gpu)
 
             # set preserve colors if indicated
+            # assuming that preserve_colors will be of type boolean
             if job_to_run.preserve_colors:
                 preserve = ''
             else:
@@ -160,13 +161,13 @@ class job_scheduler(object):
                                      '--content', '%s' % job_to_run.path1,
                                      '--styles', '%s' % job_to_run.path2,
                                      '--output','%s' % job_to_run.out,
-                                     '--content-weight', % job_to_run.content_weight,
+                                     '--content-weight', job_to_run.content_weight,
                                      '--content-weight-blend', job_to_run.content_blend,
                                      '--style-weight', job_to_run.style_weight,
                                      '--style-layer-weight-exp', job_to_run.style_layer_weight_exp,
                                      '--style-scales', job_to_run.style_scale,
                                      '--iterations', job_to_run.iterations,
-                                     '%s' % preserve,
+                                     '%s' % preserve
                                      ], env=new_env)
 
             # Append the job to the running_job list
@@ -236,12 +237,12 @@ def create_job(conn, jobs):
                  preserve_colors)
               VALUES(?,?,?,?,?,?,?,?,?,?,?) '''
     cur = conn.cursor()
-    cur.execute(sql, project)
+    cur.execute(sql, jobs)
     return cur.lastrowid
 
 if __name__ == '__main__':
 
-    js = job_scheduler(num_gpus=sys.argv[1], name_db=sys.argv[2])
+    js = job_scheduler(num_gpus=int(sys.argv[1]), name_db=sys.argv[2])
 
     # Simulate a job entry
     job1 = (1,
