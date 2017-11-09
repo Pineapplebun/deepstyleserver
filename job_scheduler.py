@@ -108,7 +108,7 @@ class job_scheduler(object):
         """
         c = self.db.cursor()
         new_job_exists = False
-        for row in c.execute("SELECT * FROM Job WHERE status='Queued'"):
+        for row in c.execute("SELECT * FROM deepstyle_job WHERE status='Queued'"):
             job_queue.put(job(entry_id=c.lastrowid,
                               path_to_im1=row['input_image'].image_path.url,
                               path_to_im2=row['style_image'].image_path.url,
