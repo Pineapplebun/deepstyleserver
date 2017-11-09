@@ -195,7 +195,7 @@ class job_scheduler(object):
             # them and we can check if any jobs are waiting. GPU bound.
             completed_job = None
             c = self.db.cursor()
-            for job_i in running_jobs:
+            for job_i in self.running_jobs:
                 exit_code = job_i.proc.poll()
                 if exit_code is not None:
                     completed_job = running_procs.remove(job_i)
