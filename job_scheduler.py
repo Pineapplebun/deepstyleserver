@@ -108,7 +108,13 @@ class job_scheduler(object):
         """
         c = self.db.cursor()
         new_job_exists = False
-        for row in c.execute("SELECT * FROM deepstyle_job WHERE job_status='Queued'"):
+        ROWS = c.execute("SELECT * FROM deepstyle_job WHERE job_status='Q'")
+
+        # checking
+        if len(c.fetchall()) == 0:
+            print("cannot find any jobs")
+
+        for row in ROWS:
             self.job_queue.put(job(entry_id=c.lastrowid,
                               path_to_im1=row['input_image'].image_path.url,
                               path_to_im2=row['style_image'].image_path.url,
@@ -121,8 +127,9 @@ class job_scheduler(object):
                               iterations=row['iterations'],
                               preserve_colors=row['preserve_colors'])
                           )
+
             # Set queue status of current row's id to be 'queued'
-            c.execute("UPDATE deepstyle_job SET status='In Progress' WHERE rowid = %d" % c.lastrowid)
+            c.execute("UPDATE deepstyle_job SET job_status='P' WHERE rowid = %d" % c.lastrowid)
             new_job_exists = True
             self.logger.log.info("Job %d set In Progress" % c.lastrowid)
             print("ran create")
@@ -207,14 +214,14 @@ class job_scheduler(object):
                     gpu_free.put(completed_job.gpu)
 
                     # Change status of job in database
-                    c.execute("UPDATE deepstyle_job SET job_status='Completed' WHERE rowid = %s" % c.lastrowid)
+                    c.execute("UPDATE deepstyle_job SET job_status='C' WHERE rowid = %s" % c.lastrowid)
 
                     self.logger.log.info(job_i)
                     break
 
             if exit_code != 0 and completed_job is not None:
                 print("Error in Popen")
-                c.execute("UPDATE deepstyle_job SET job_status='Failed' WHERE rowid = %s" % c.lastrowid)
+                c.execute("UPDATE deepstyle_job SET job_status='F' WHERE rowid = %s" % c.lastrowid)
                 self.logger.log.error(job_i)
 
             # close cursor
