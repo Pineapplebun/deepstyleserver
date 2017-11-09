@@ -32,4 +32,4 @@ nvidia-docker run — rm nvidia/cuda nvidia-smi
 # I think we need to change docker to nvidia-docker
 # If we need to leverage gpu
 nvidia-docker build -t deepstyleapp .
-nvidia-docker run -p 80:80 -d -it deepstyleapp sh /app/start_app_wrapper.sh
+nvidia-docker run -p 8000:8000 -d -it deepstyleapp sh /app/start_app_wrapper.sh
