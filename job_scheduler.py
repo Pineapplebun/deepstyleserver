@@ -182,7 +182,7 @@ class job_scheduler(object):
             # When a new job exists in the database, create a job and load
             # into the job queue.
             self.create_jobs_and_queue()
-
+            print("going")
             # When a job exists in the job queue
             if not self.job_queue.empty():
                 while not gpu_free.empty():
