@@ -124,9 +124,17 @@ class job_scheduler(object):
             input_row = s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['input_image_id'])
             input_row_path = input_row['image_path'] 
 
+            style_row = s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['style_image_id'])
+            style_row_path = style_row['image_path']
+
+            output_row = s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" row['output_image_id'])
+            output_row_path = output_row['image_path']
+
             """
+            print("The value in input_image is:\n")
+            print(row['input_image'])
             self.job_queue.put(job(entry_id=row['id'],
-                              path_to_im1=row['input_image_path'],
+                              path_to_im1=row['input_image'],
                               path_to_im2=row['style_image_path'],
                               output_path=row['output_image_path'],
                               content_weight=row['content_weight'],
