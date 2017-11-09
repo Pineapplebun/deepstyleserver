@@ -1,33 +1,27 @@
-from django.shortcuts import render
-from django.http import Http404
-from .models import Image, Job
+from django.views import generic
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.core.urlresolvers import reverse_lazy
+from .models import Job
 
-# Create your views here.
+class IndexView(generic.ListView):
+    template_name = 'deepstyle/index.html'
+    context_object_name = 'all_jobs'
 
-# project/deepstyle/
-def index(request):
-    html = ''
+    def get_queryset(self):
+        return Job.objects.all()
 
-    #querying and templating results from the database
-    all_jobs = Job.objects.all()
-    for job in all_jobs:
-        print (job.job_name)
-        
-    context = {
-        'all_jobs' : all_jobs,
-    }
+class DetailView(generic.DetailView):
+    model = Job
+    template_name = 'deepstyle/detail.html'
 
-    return render(request, 'deepstyle/index.html', context)
+class CreateJob(CreateView):
+    model = Job
+    fields = ['job_name', 'job_description', 'input_image', 'output_width', 'iterations', 'content_weight', 'content_weight_blend', 'style_weight', 'learning_rate', 'style_layer_weight_exp', 'perserve_color', 'pooling']
 
-# project/deepstyle/job_id
-def job_details(request, job_id):
-    try:
-        job = Job.objects.get(pk=job_id)
-    except Job.DoesNotExist:
-        raise Http404("A job with ID " + job_id + " does not exist")
+class EditJob(UpdateView):
+    model = Job
+    fields = ['job_name', 'job_description']
 
-    context = {
-        'job' : job,
-    }
-
-    return render(request, 'deepstyle/job_details.html', context)
+class DeleteJob(DeleteView):
+    model = Job
+    success_url = reverse_lazy('deepstyle:index')

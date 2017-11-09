@@ -1,0 +1,19 @@
+{% extends 'deepstyle/base.html' %}
+
+{% block body %}
+
+	<h2>{{ job.id }} : {{ job.job_name }}</h2>
+
+	<h3>Input Image</h3>
+	<img src="{{ job.input_image.image_path.url }}" alt="" width="100px" height="100px">
+	<a href="{{ job.input_image.image_path.url }}" download></a>
+
+	<h3>Style Image</h3>
+	<img src="{{ job.style_image.image_path.url }}" alt="" width="100px" height="100px">
+
+	<h3>Output Image</h3>
+	<img src="{{ job.output_image.image_path.url }}" alt="" width="100px" height="100px">
+
+	<a href="{% url 'deepstyle:EditJob' job.id %}">Edit job name and details</a>
+
+{% endblock %}

@@ -1,14 +1,52 @@
-{% if all_jobs %}
-	<ul>
-		{% for job in all_jobs %}
+{% extends 'deepstyle/base.html' %}
 
-		<li><a href="/deepstyle/{{ job.id }}/">{{ job.job_name }}</a></li>
-		{% endfor %}
-	</ul>
+{% block body %}
 
-{% else %}
-	<script>
-		alert("There are no jobs in this application.")
-	</script>
+	<!-- Printing a list of all the jobs -->
 
-{% endif %}
+	<div class="row">
+	<h3>Job List</h3>
+	{% if all_jobs %}
+
+		<table class="highlight responsible-table z-depth-1">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Job Name</th>
+					<th>Input Image</th>
+					<th>Style Image</th>
+					<th>Style Weight</th>
+					<th>Content Weight</th>
+					<th>Job Status</th>
+					<th>Edit/Delete</th>
+				</tr>
+			</thead>
+
+			<tbody>
+
+				{% for job in all_jobs %}
+				<tr>
+					<td>{{ job.id }}</td>
+					<td><a href="{% url 'deepstyle:detail' job.id %}">{{ job.job_name }}</a></td>
+					<td>{{ job.input_image.image_name }}</td>
+					<td>{{ job.output_image.image_name }}</td>
+					<td>{{ job.style_weight }}</td>
+					<td>{{ job.content_weight }}</td>
+					<td>{{ job.get_job_status_display }}</td>
+					<td><a href="{% url 'deepstyle:EditJob' job.id %}"><i class="small material-icons tooltipped" data-position="bottom" data-delay="10" data-tooltip="I am a tooltip">edit</i></a><a href="{% url 'deepstyle:DeleteJob' job.id %}"><i class="small material-icons">delete</i></a></td>
+				</tr>
+				{% endfor %}
+
+			</tbody>
+		</table>
+
+	<!-- Printing a warning when no jobs exist yet -->
+	{% else %}
+		<script>
+			alert("There are no jobs in this application.")
+		</script>
+
+	{% endif %}
+	</div>
+
+{% endblock %}

@@ -1,10 +1,11 @@
 from django.db import models
 from datetime import datetime
+from django.core.urlresolvers import reverse
 
 # Image model for holding the image
 class Image(models.Model):
     image_name = models.CharField(max_length = 500)
-    image_description = models.TextField(default="Just another image")
+    image_description = models.TextField(default = "Just another image")
     image_path = models.FileField()
 
     # image type
@@ -14,7 +15,7 @@ class Image(models.Model):
         (INPUT_IMAGE, "Input"),
         (OUTPUT_IMAGE, "Output")
     )
-    image_type = models.CharField(max_length = 1, choices = IMAGE_TYPE_OPTIONS, default = INPUT_IMAGE) # TOFIX: have only "input" as option for the user
+    image_type = models.CharField(max_length = 1, choices = IMAGE_TYPE_OPTIONS, default = INPUT_IMAGE)
 
     # string repr. of the class
     def __str__(self):
@@ -39,13 +40,15 @@ class Job(models.Model):
 
 
     # parameters for running a job
-    output_width = models.PositiveSmallIntegerField() # TOFIX: add a limit?
-    iterations = models.PositiveIntegerField(default = 2000) # TOFIX: default is 2000?
-    content_weight = models.FloatField() # TOFIX: Find the default
-    style_weight = models.FloatField() # TOFIX: Find the default
-    learning_rate = models.FloatField() # TOFIX: Find the default
-    style_layer_weight_exp = models.FloatField() # TOFIX: default is 1.0
-    perserve_color = models.BooleanField() # TOFIX: default is false?
+    # TOFIX: add more restricted limit to each param?
+    output_width = models.PositiveSmallIntegerField()
+    iterations = models.PositiveIntegerField(default = 1000)
+    content_weight = models.FloatField(default = 5e0)
+    content_weight_blend = models.FloatField(default = 1)
+    style_weight = models.FloatField(default = 5e2)
+    learning_rate = models.FloatField(default = 1e1)
+    style_layer_weight_exp = models.FloatField(default = 1)
+    perserve_color = models.BooleanField(default = False)
 
     # pooling
     POOLING_OPTIONS = (
@@ -70,6 +73,9 @@ class Job(models.Model):
     job_start = models.DateTimeField(blank = True, null = True)
     job_completed = models.DateTimeField(blank = True, null = True)
 
+    # currently returning to the job list page
+    def get_absolute_url(self):
+        return reverse('deepstyle:index', kwargs = None)
 
     # string repr. of the class
     def __str__(self):
