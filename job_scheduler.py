@@ -108,8 +108,8 @@ class job_scheduler(object):
         """
         c = self.db.cursor()
         new_job_exists = False
-        for row in c.execute("SELECT * FROM jobs WHERE status='Queued'"):
-            job_queue.put(job(entry_id=row['job_name'],
+        for row in c.execute("SELECT * FROM Job WHERE status='Queued'"):
+            job_queue.put(job(entry_id=c.lastrowid,
                               path_to_im1=row['input_image'].image_path.url,
                               path_to_im2=row['style_image'].image_path.url,
                               output_path=row['output_image'].image_path.url,
@@ -122,7 +122,7 @@ class job_scheduler(object):
                               preserve_colors=row['preserve_colors'])
                           )
             # Set queue status of current row's id to be 'queued'
-            c.execute("UPDATE jobs SET status='In Progress' WHERE job_name = %s" % row['job_name'])
+            c.execute("UPDATE deepstyle_job SET status='In Progress' WHERE rowid = %d" % c.lastrowid)
             new_job_exists = True
         c.close()
         if new_job_exists:
@@ -202,61 +202,20 @@ class job_scheduler(object):
                     gpu_free.put(completed_job.gpu)
 
                     # Change status of job in database
-                    c.execute("UPDATE jobs SET status='Completed' WHERE job_name = %s" % row['job_name'])
+                    c.execute("UPDATE deepstyle_job SET status='Completed' WHERE rowid = %s" % c.lastrowid)
 
                     self.logger.info(job_i)
                     break
 
             if exit_code != 0 and completed_job is not None:
-                c.execute("UPDATE jobs SET status='Failed' WHERE job_name = %s" % row['job_name'])
+                c.execute("UPDATE deepstyle_job SET status='Failed' WHERE rowid = %s" % c.lastrowid)
                 self.logger.error(job_i)
 
             # close cursor
             c.close()
 
-
-## HELPER FUNCTIONS
-def create_job(conn, Job):
-    """
-    Create a new project into the projects table
-    :param conn:
-    :param project:
-    :return: project id
-    """
-    sql = ''' INSERT INTO Job(
-                 entry_id,
-                 path_to_im1,
-                 path_to_im2,
-                 output_path,
-                 content_weight,
-                 content_blend,
-                 style_weight,
-                 style_scale,
-                 style_layer_weight_exp,
-                 iterations,
-                 preserve_colors)
-              VALUES(?,?,?,?,?,?,?,?,?,?,?) '''
-    cur = conn.cursor()
-    cur.execute(sql, Job)
-    return cur.lastrowid
-
 if __name__ == '__main__':
 
     js = job_scheduler(num_gpus=int(sys.argv[1]), name_db=sys.argv[2])
-
-    # Simulate a job entry
-    job1 = (1,
-            "/app/test/dog.jpg",
-            "/app/test/cat.jpg",
-            "/app/test_out/dogcat.jpg",
-            5e0,
-            1,
-            5e2,
-            1.0,
-            1,
-            1000,
-            True)
-
-    create_job(js.db, job1)
 
     js.main()
