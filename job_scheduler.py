@@ -140,7 +140,7 @@ class job_scheduler(object):
         NOTE: NEED TO CHANGE THE TENSORFLOW EVALUATE SCRIPT TO ALLOW
         SOFT PLACEMENT IN THE SESSION.
         """
-        if not gpu_free.is_empty():
+        if not gpu_free.empty():
             job_to_run = self.job_queue.get()
             job_to_run.gpu = gpu_free.get()
 
@@ -184,8 +184,8 @@ class job_scheduler(object):
             self.create_jobs_and_queue()
 
             # When a job exists in the job queue
-            if not self.job_queue.is_empty():
-                while not gpu_free.is_empty():
+            if not self.job_queue.empty():
+                while not gpu_free.empty():
                     self.assign_gpu_and_run()
 
             # Check the processes that are running
