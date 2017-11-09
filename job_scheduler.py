@@ -92,6 +92,7 @@ class job_scheduler(object):
 
         try:
             self.db = sqlite3.connect(name_db)
+            self.db.row_factory = sqlite3.Row
         except Exception as e:
             print(e)
             sys.exit()
@@ -115,7 +116,7 @@ class job_scheduler(object):
         #    print("cannot find any jobs")
 
         for row in c.fetchall():
-            print("inside row in create")
+            print(row.keys())
             self.job_queue.put(job(entry_id=c.lastrowid,
                               path_to_im1=row['input_image'].image_path.url,
                               path_to_im2=row['style_image'].image_path.url,
