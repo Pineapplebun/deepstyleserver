@@ -125,6 +125,7 @@ class job_scheduler(object):
             c.execute("UPDATE deepstyle_job SET status='In Progress' WHERE rowid = %d" % c.lastrowid)
             new_job_exists = True
             self.logger.log.info("Job %d set In Progress" % c.lastrowid)
+            print("ran create")
         c.close()
         if new_job_exists:
             self.db.commit()
@@ -172,6 +173,7 @@ class job_scheduler(object):
                                      ], env=new_env)
 
             self.logger.log.info("Job %d assigned GPU %d." % (job_to_run.job_id, job_to_run.gpu))
+            print("ran assign")
             # Append the job to the running_job list
             running_procs.append(job_to_run)
 
