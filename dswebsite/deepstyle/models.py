@@ -42,7 +42,7 @@ class Job(models.Model):
     style_scale = models.FloatField(default = 1.0)
     learning_rate = models.FloatField(default = 1e1)
     style_layer_weight_exp = models.FloatField(default = 1)
-    perserve_color = models.BooleanField(default = False)
+    preserve_color = models.BooleanField(default = False)
 
     # pooling
     POOLING_OPTIONS = (
