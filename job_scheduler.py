@@ -75,8 +75,8 @@ class logger(object):
         self.ch.setFormatter(formatter)
         self.fh.setFormatter(formatter)
 
-        self.log.addHandler(fh)
-        self.log.addHandler(ch)
+        self.log.addHandler(self.fh)
+        self.log.addHandler(self.ch)
 
     def shutdown(self):
         logging.shutdown()
@@ -126,16 +126,18 @@ class job_scheduler(object):
 
             s = self.db.cursor()
 
-            input_row = s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['input_image_id'])
+            s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['input_image_id'])
+            input_row = s.fetchone()
             input_row_path = input_row['image_file']
 
-            style_row = s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['style_image_id'])
+            s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['style_image_id'])
+            style_row = s.fetchone()
             style_row_path = style_row['image_file']
 
             self.job_queue.put(job(j_id=row['id'],
                               path_to_im1= input_row_path,
                               path_to_im2= style_row_path,
-                              output_path= row['output_path'],
+                              output_path= row['output_image'],
                               content_weight=row['content_weight'],
                               content_blend=row['content_weight_blend'],
                               style_weight=row['style_weight'],
