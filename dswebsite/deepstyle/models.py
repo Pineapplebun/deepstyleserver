@@ -55,12 +55,16 @@ class Job(models.Model):
     QUEUED = 'Q'
     INPROGRESS = 'P'
     COMPLETED = 'C'
+    FAIL = 'F'
+    PROGRESS_FAIL = 'PF'
     JOB_STATUS_OPTIONS = (
         (QUEUED, "Queued"),
         (INPROGRESS, "In Progress"),
-        (COMPLETED, "Completed")
+        (COMPLETED, "Completed"),
+        (FAIL, "Failed"),
+        (PROGRESS_FAIL, "Progress Failed"),
     )
-    job_status = models.CharField(max_length = 1, choices = JOB_STATUS_OPTIONS, default = QUEUED)
+    job_status = models.CharField(max_length = 2, choices = JOB_STATUS_OPTIONS, default = QUEUED)
 
     # job times
     job_added = models.DateTimeField(default = datetime.now)
