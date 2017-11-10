@@ -12,7 +12,7 @@
 	<img src="{{ job.style_image.image_path.url }}" alt="" width="100px" height="100px">
 
 	<h3>Output Image</h3>
-	<img src="{{ job.output_image.image_path.url }}" alt="" width="100px" height="100px">
+	<img src="{{ job.output_image.image_path.url }}" alt="Image is still being processed" width="100px" height="100px">
 
 	<a href="{% url 'deepstyle:EditJob' job.id %}">Edit job name and details</a>
 
