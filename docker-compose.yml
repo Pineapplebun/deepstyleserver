@@ -6,8 +6,8 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./app:/app
-      - ./config/nginx:/etc/nginx/conf.d
+      - ./dswebsite:/app
+      - ./nginx:/etc/nginx/conf.d
     depends_on:
       - web
   web:
