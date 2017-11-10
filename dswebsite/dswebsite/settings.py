@@ -75,22 +75,22 @@ WSGI_APPLICATION = 'dswebsite.wsgi.application'
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
 # Using sqlite
-DATABASES = {
+DATABASES_backup = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
 
-# Using mysql
-DATABASES_BACKUP = {
+# Using postgresql
+DATABASES= {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'deepstyle',
-        'USER': 'root',
-        'PASSWORD': 'password',
-        'HOST': '',
-        'PORT': ''
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'workshop',
+        'USER': 'work',
+        'PASSWORD': '123212321',
+        'HOST': 'localhost',
+        'PORT': '', 
     }
 }
 
