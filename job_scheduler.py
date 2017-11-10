@@ -134,18 +134,22 @@ class job_scheduler(object):
             style_row = s.fetchone()
             style_row_path = style_row['image_file']
 
-            self.job_queue.put(job(j_id=row['id'],
-                              path_to_im1= input_row_path,
-                              path_to_im2= style_row_path,
-                              output_path= row['output_image'],
-                              content_weight=row['content_weight'],
-                              content_blend=row['content_weight_blend'],
-                              style_weight=row['style_weight'],
-                              style_scale=row['style_scale'],
-                              style_layer_weight_exp=row['style_layer_weight_exp'],
-                              iterations=row['iterations'],
-                              preserve_colors=row['preserve_colors'])
-                          )
+            try:
+                self.job_queue.put(job(j_id=row['id'],
+                                  path_to_im1= input_row_path,
+                                  path_to_im2= style_row_path,
+                                  output_path= row['output_image'],
+                                  content_weight=row['content_weight'],
+                                  content_blend=row['content_weight_blend'],
+                                  style_weight=row['style_weight'],
+                                  style_scale=row['style_scale'],
+                                  style_layer_weight_exp=row['style_layer_weight_exp'],
+                                  iterations=row['iterations'],
+                                  preserve_colors=row['preserve_colors'])
+                              )
+            except Exception as e:
+                print(e)
+
 
             # Set queue status of current row's id to be 'queued'
             c.execute("UPDATE deepstyle_job SET job_status='P' WHERE rowid = %d" % row['id'])
@@ -185,26 +189,29 @@ class job_scheduler(object):
                 preserve = '--preserve-colors'
 
             # Run the subprocess
-            job_to_run.proc = Popen(['python',
-                                     'neural_style.py',
-                                     '--content', '%s' % job_to_run.path1,
-                                     '--styles', '%s' % job_to_run.path2,
-                                     '--output','%s' % job_to_run.out,
-                                     '--content-weight', job_to_run.content_weight,
-                                     '--content-weight-blend', job_to_run.content_blend,
-                                     '--style-weight', job_to_run.style_weight,
-                                     '--style-layer-weight-exp', job_to_run.style_layer_weight_exp,
-                                     '--style-scales', job_to_run.style_scale,
-                                     '--iterations', job_to_run.iterations,
-                                     '%s' % preserve
-                                     ], env=new_env)
+            try:
+                job_to_run.proc = Popen(['python',
+                                         'neural_style.py',
+                                         '--content', '%s' % job_to_run.path1,
+                                         '--styles', '%s' % job_to_run.path2,
+                                         '--output','%s' % job_to_run.out,
+                                         '--content-weight', job_to_run.content_weight,
+                                         '--content-weight-blend', job_to_run.content_blend,
+                                         '--style-weight', job_to_run.style_weight,
+                                         '--style-layer-weight-exp', job_to_run.style_layer_weight_exp,
+                                         '--style-scales', job_to_run.style_scale,
+                                         '--iterations', job_to_run.iterations,
+                                         '%s' % preserve
+                                         ], env=new_env)
+            except Exception as e:
+                print(e)
 
             # Log assignment
             self.logger.log.info("Job %d assigned GPU %d." % (job_to_run.job_id, job_to_run.gpu))
             print("ran assign")
 
             # Append the job to the running_job list
-            running_procs.append(job_to_run)
+            #running_procs.append(job_to_run)
 
     def main(self):
         """
