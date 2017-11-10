@@ -22,7 +22,7 @@ preserve_color : bool
 """
 class job(object):
     def __init__(self,
-                 entry_id,
+                 j_id,
                  im_name1,
                  im_name2,
                  output_name,
@@ -34,7 +34,7 @@ class job(object):
                  iterations,
                  preserve_colors):
 
-        self.job_id = entry_id
+        self.job_id = j_id
         self.path1 = INPUT_FILE_PATH + im_name1
         self.path2 = INPUT_FILE_PATH + im_name2
         self.out = OUTPUT_FILE_PATH + output_name
@@ -120,6 +120,7 @@ class job_scheduler(object):
         # checking
         #if len(c.fetchall()) == 0:
         #    print("cannot find any jobs")
+
         row = c.fetchone()
         while row is not None:
 
@@ -131,16 +132,7 @@ class job_scheduler(object):
             style_row = s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['style_image_id'])
             style_row_path = style_row['image_file']
 
-            """"
-            output_row = s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" row['output_image_id'])
-            output_row_path = output_row['image_file']
-            """"
-
-            print("The value in input_image is:\n")
-            print("The value in stylize_image is:\n")
-            print("The value in output_image is:\n")
-
-            self.job_queue.put(job(entry_id=row['id'],
+            self.job_queue.put(job(j_id=row['id'],
                               path_to_im1= input_row_path,
                               path_to_im2= style_row_path,
                               output_path= row['output_path'],
@@ -157,7 +149,6 @@ class job_scheduler(object):
             c.execute("UPDATE deepstyle_job SET job_status='P' WHERE rowid = %d" % row['id'])
             new_job_exists = True
             self.logger.log.info("Job %d set In Progress" % row['id'])
-            print("ran create")
             row = c.fetchone()
         c.close()
 
@@ -206,8 +197,10 @@ class job_scheduler(object):
                                      '%s' % preserve
                                      ], env=new_env)
 
+            # Log assignment
             self.logger.log.info("Job %d assigned GPU %d." % (job_to_run.job_id, job_to_run.gpu))
             print("ran assign")
+
             # Append the job to the running_job list
             running_procs.append(job_to_run)
 
