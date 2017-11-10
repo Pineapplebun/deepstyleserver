@@ -39,6 +39,7 @@ class Job(models.Model):
     content_weight = models.FloatField(default = 5e0)
     content_weight_blend = models.FloatField(default = 1)
     style_weight = models.FloatField(default = 5e2)
+    style_scale = models.FloatField(default = 1.0)
     learning_rate = models.FloatField(default = 1e1)
     style_layer_weight_exp = models.FloatField(default = 1)
     perserve_color = models.BooleanField(default = False)
