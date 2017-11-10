@@ -1,6 +1,9 @@
 import queue, sqlite3, logging, os, sys
 from subprocess import Popen
 
+INPUT_FILE_PATH="/input"
+OUTPUT_FILE_PATH="/output"
+
 """
 A job that contains information about the POST request.
 Required information:
@@ -20,9 +23,9 @@ preserve_color : bool
 class job(object):
     def __init__(self,
                  entry_id,
-                 path_to_im1,
-                 path_to_im2,
-                 output_path,
+                 im_name1,
+                 im_name2,
+                 output_name,
                  content_weight,
                  content_blend,
                  style_weight,
@@ -32,9 +35,9 @@ class job(object):
                  preserve_colors):
 
         self.job_id = entry_id
-        self.path1 = path_to_im1
-        self.path2 = path_to_im2
-        self.out = output_path
+        self.path1 = INPUT_FILE_PATH + im_name1
+        self.path2 = INPUT_FILE_PATH + im_name2
+        self.out = OUTPUT_FILE_PATH + output_name
         self.content_weight = content_weight
         self.content_blend = content_blend
         self.style_weight = style_weight
@@ -71,6 +74,9 @@ class logger(object):
         # add formatter to ch
         self.ch.setFormatter(formatter)
         self.fh.setFormatter(formatter)
+
+        self.log.addHandler(fh)
+        self.log.addHandler(ch)
 
     def shutdown(self):
         logging.shutdown()
@@ -116,27 +122,28 @@ class job_scheduler(object):
         #    print("cannot find any jobs")
         row = c.fetchone()
         while row is not None:
-                                   
+
             s = self.db.cursor()
-            
+
             input_row = s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['input_image_id'])
-            input_row_path = input_row['image_file'] 
+            input_row_path = input_row['image_file']
 
             style_row = s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['style_image_id'])
             style_row_path = style_row['image_file']
 
+            """"
             output_row = s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" row['output_image_id'])
             output_row_path = output_row['image_file']
+            """"
 
-            
             print("The value in input_image is:\n")
             print("The value in stylize_image is:\n")
             print("The value in output_image is:\n")
-            """
+
             self.job_queue.put(job(entry_id=row['id'],
-                              path_to_im1=row['input_image'],
-                              path_to_im2=row['style_image_path'],
-                              output_path=row['output_image_path'],
+                              path_to_im1= input_row_path,
+                              path_to_im2= style_row_path,
+                              output_path= row['output_path'],
                               content_weight=row['content_weight'],
                               content_blend=row['content_weight_blend'],
                               style_weight=row['style_weight'],
@@ -146,7 +153,6 @@ class job_scheduler(object):
                               preserve_colors=row['preserve_colors'])
                           )
 
-            """
             # Set queue status of current row's id to be 'queued'
             c.execute("UPDATE deepstyle_job SET job_status='P' WHERE rowid = %d" % row['id'])
             new_job_exists = True
