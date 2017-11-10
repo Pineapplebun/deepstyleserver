@@ -1,9 +1,9 @@
 import queue, sqlite3, logging, os, sys
 from subprocess import Popen
 
-INPUT_FILE_PATH="/input"
-OUTPUT_FILE_PATH="/output"
-
+INPUT_FILE_PATH="/app/dswebsite/images"
+OUTPUT_FILE_PATH="/app/dswebsite/output_images"
+VGG_LOCATION="/app/neural-style/imagenet-vgg-verydeep-19.mat"
 """
 A job that contains information about the POST request.
 Required information:
@@ -198,6 +198,7 @@ class job_scheduler(object):
                       '--style-layer-weight-exp', str(job_to_run.style_layer_weight_exp),
                       '--style-scales', str(job_to_run.style_scale),
                       '--iterations', str(job_to_run.iterations),
+                      '--network', VGG_LOCATION
                      ]
             # set preserve colors if indicated
             # assuming that preserve_colors will be of type boolean

@@ -15,6 +15,8 @@ RUN wget http://www.vlfeat.org/matconvnet/models/beta16/imagenet-vgg-verydeep-19
 
 EXPOSE 8000
 
+WORKDIR /app
+
 COPY dswebsite /app/dswebsite
 COPY neural-style/ /app/neural-style
 COPY start_app_wrapper.sh /app
