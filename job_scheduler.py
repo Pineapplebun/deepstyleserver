@@ -32,7 +32,7 @@ class job(object):
                  style_scale,
                  style_layer_weight_exp,
                  iterations,
-                 preserve_colors):
+                 preserve_color):
 
         self.job_id = j_id
         self.path1 = INPUT_FILE_PATH + im_name1
@@ -43,7 +43,7 @@ class job(object):
         self.style_weight = style_weight
         self.style_scale = style_scale
         self.style_layer_weight_exp = style_layer_weight_exp
-        self.preserve_colors = preserve_colors
+        self.preserve_color = preserve_color
 
         if (iterations < 5000):
             self.iterations = iterations
@@ -123,18 +123,18 @@ class job_scheduler(object):
 
         row = c.fetchone()
         while row is not None:
-
-            s = self.db.cursor()
-
-            s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['input_image_id'])
-            input_row = s.fetchone()
-            input_row_path = input_row['image_file']
-
-            s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['style_image_id'])
-            style_row = s.fetchone()
-            style_row_path = style_row['image_file']
-
             try:
+
+                s = self.db.cursor()
+
+                s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['input_image_id'])
+                input_row = s.fetchone()
+                input_row_path = input_row['image_file']
+
+                s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['style_image_id'])
+                style_row = s.fetchone()
+                style_row_path = style_row['image_file']
+
                 self.job_queue.put(job(j_id=row['id'],
                                   path_to_im1= input_row_path,
                                   path_to_im2= style_row_path,
@@ -145,18 +145,23 @@ class job_scheduler(object):
                                   style_scale=row['style_scale'],
                                   style_layer_weight_exp=row['style_layer_weight_exp'],
                                   iterations=row['iterations'],
-                                  preserve_colors=row['preserve_colors'])
+                                  preserve_color=row['preserve_color'])
                               )
+
+                # Set queue status of current row's id to be 'queued'
+                c.execute("UPDATE deepstyle_job SET job_status='P' WHERE rowid = %d" % row['id'])
+                new_job_exists = True                   
+                self.logger.log.info("Job %d set In Progress" % row['id'])
+
+            
             except Exception as e:
                 self.logger.log.error("Job %d could not be set In Progress" % row['id'])
-                print(e)
-
-
-            # Set queue status of current row's id to be 'queued'
-            c.execute("UPDATE deepstyle_job SET job_status='P' WHERE rowid = %d" % row['id'])
-            new_job_exists = True
-            self.logger.log.info("Job %d set In Progress" % row['id'])
+                self.logger.log.exception(e)
+                z = self.db.cursor()
+                z.execute("UPDATE deepstyle_job SET job_status='F' WHERE rowid = %d" % row['id'])
+        
             row = c.fetchone()
+            
         c.close()
 
         if new_job_exists:
@@ -184,9 +189,8 @@ class job_scheduler(object):
 
             # set preserve colors if indicated
             # assuming that preserve_colors will be of type boolean
-            if job_to_run.preserve_colors:
-                preserve = ''
-            else:
+            preserve = ''
+            if job_to_run.preserve_color:
                 preserve = '--preserve-colors'
 
             # Run the subprocess
@@ -204,21 +208,19 @@ class job_scheduler(object):
                                          '--iterations', job_to_run.iterations,
                                          '%s' % preserve
                                          ], env=new_env)
+                self.logger.log.info("Job %d assigned GPU %d." % (job_to_run.job_id, job_to_run.gpu))
+                running_procs.append(job_to_run)
+            
             except Exception as e:
                 self.logger.log.error("Job %d could not be assigned GPU %d." % (job_to_run.job_id, job_to_run.gpu))
-                print(e)
-
-            # Log assignment
-            self.logger.log.info("Job %d assigned GPU %d." % (job_to_run.job_id, job_to_run.gpu))
-            print("ran assign")
-
-            # Append the job to the running_job list
-            #running_procs.append(job_to_run)
+                self.logger.log.exception(e)
+                c = self.db.cursor()
+                c.execute("UPDATE deepstyle_job SET job_status='PF' WHERE rowid = %d" % job_to_run.job_id)
 
     def main(self):
         """
-        Create a pool of processes equivalent to the number of gpus
-        Need async multiprocessing here...
+        The main method to run to check, assign and run jobs.
+        
         """
         while True:
             # When a new job exists in the database, create a job and load
@@ -240,6 +242,9 @@ class job_scheduler(object):
             c = self.db.cursor()
             exit_code = 0
             for job_i in self.running_jobs:
+                # the proc could be None if the process doesn't exist
+                # but this is mitigated since no job in running_jobs will
+                # ever have None in its proc attribute
                 exit_code = job_i.proc.poll()
                 if exit_code is not None:
                     completed_job = running_procs.remove(job_i)
@@ -252,9 +257,10 @@ class job_scheduler(object):
                     break
 
             if exit_code != 0 and completed_job is not None:
-                print("Error in Popen")
+                
+                # Remove job from executing by setting status to F
                 c.execute("UPDATE deepstyle_job SET job_status='F' WHERE rowid = %s" % row['id'])
-                self.logger.log.error(job_i)
+                self.logger.log.error(str(job_i) + " failed to complete.")
 
             # close cursor
             c.close()
