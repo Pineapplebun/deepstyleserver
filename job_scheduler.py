@@ -148,6 +148,7 @@ class job_scheduler(object):
                                   preserve_colors=row['preserve_colors'])
                               )
             except Exception as e:
+                self.logger.log.error("Job %d could not be set In Progress" % row['id'])
                 print(e)
 
 
@@ -204,6 +205,7 @@ class job_scheduler(object):
                                          '%s' % preserve
                                          ], env=new_env)
             except Exception as e:
+                self.logger.log.error("Job %d could not be assigned GPU %d." % (job_to_run.job_id, job_to_run.gpu))
                 print(e)
 
             # Log assignment
