@@ -150,18 +150,18 @@ class job_scheduler(object):
 
                 # Set queue status of current row's id to be 'queued'
                 c.execute("UPDATE deepstyle_job SET job_status='P' WHERE rowid = %d" % row['id'])
-                new_job_exists = True                   
+                new_job_exists = True
                 self.logger.log.info("Job %d set In Progress" % row['id'])
 
-            
+
             except Exception as e:
                 self.logger.log.error("Job %d could not be set In Progress" % row['id'])
                 self.logger.log.exception(e)
                 z = self.db.cursor()
                 z.execute("UPDATE deepstyle_job SET job_status='F' WHERE rowid = %d" % row['id'])
-        
+
             row = c.fetchone()
-            
+
         c.close()
 
         if new_job_exists:
@@ -187,30 +187,29 @@ class job_scheduler(object):
             new_env = os.environ.copy()
             new_env['CUDA_VISIBLE_DEVICES'] = str(job_to_run.gpu)
 
+            params = ['python',
+                      '/app/neural-style/neural_style.py',
+                      '--content', '%s' % job_to_run.path1,
+                      '--styles', '%s' % job_to_run.path2,
+                      '--output','%s' % job_to_run.output_path,
+                      '--content-weight', str(job_to_run.content_weight),
+                      '--content-weight-blend', str(job_to_run.content_blend),
+                      '--style-weight', str(job_to_run.style_weight),
+                      '--style-layer-weight-exp', str(job_to_run.style_layer_weight_exp),
+                      '--style-scales', str(job_to_run.style_scale),
+                      '--iterations', str(job_to_run.iterations),
+                     ]
             # set preserve colors if indicated
             # assuming that preserve_colors will be of type boolean
-            preserve = ''
             if job_to_run.preserve_color:
-                preserve = '--preserve-colors'
+                params.append('--preserve-colors')
 
             # Run the subprocess
             try:
-                job_to_run.proc = Popen(['python',
-                                         '/app/neural-style/neural_style.py',
-                                         '--content', '%s' % job_to_run.path1,
-                                         '--styles', '%s' % job_to_run.path2,
-                                         '--output','%s' % job_to_run.output_path,
-                                         '--content-weight', str(job_to_run.content_weight),
-                                         '--content-weight-blend', str(job_to_run.content_blend),
-                                         '--style-weight', str(job_to_run.style_weight),
-                                         '--style-layer-weight-exp', str(job_to_run.style_layer_weight_exp),
-                                         '--style-scales', str(job_to_run.style_scale),
-                                         '--iterations', str(job_to_run.iterations),
-                                         '%s' % preserve
-                                         ], env=new_env)
+                job_to_run.proc = Popen(params, env=new_env)
                 self.logger.log.info("Job %d assigned GPU %d." % (job_to_run.job_id, job_to_run.gpu))
                 self.running_jobs.append(job_to_run)
-            
+
             except Exception as e:
                 self.logger.log.error("Job %d could not be assigned GPU %d." % (job_to_run.job_id, job_to_run.gpu))
                 self.logger.log.exception(e)
@@ -222,7 +221,7 @@ class job_scheduler(object):
     def main(self):
         """
         The main method to run to check, assign and run jobs.
-        
+
         """
         while True:
             # When a new job exists in the database, create a job and load
@@ -230,7 +229,7 @@ class job_scheduler(object):
             self.create_jobs_and_queue()
 
             # When a job exists in the job queue
-            if not self.job_queue.empty(): 
+            if not self.job_queue.empty():
                 while not self.gpu_free.empty():
                     self.assign_gpu_and_run()
 
@@ -264,7 +263,7 @@ class job_scheduler(object):
             # Completed_job only None if exit_code is None which means it's still running
             # If exit_code is not 0, then an error has occurred.
             if exit_code != 0 and completed_job is not None:
-                
+
                 # Remove job from executing by setting status to F
                 c.execute("UPDATE deepstyle_job SET job_status='F' WHERE rowid = %s" % completed_job.job_id)
                 self.logger.log.error(str(job_i) + " failed to complete.")
