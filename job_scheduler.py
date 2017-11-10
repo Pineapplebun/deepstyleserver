@@ -37,7 +37,7 @@ class job(object):
         self.job_id = j_id
         self.path1 = INPUT_FILE_PATH + im_name1
         self.path2 = INPUT_FILE_PATH + im_name2
-        self.out = OUTPUT_FILE_PATH + output_name
+        self.output_path = OUTPUT_FILE_PATH + output_name
         self.content_weight = content_weight
         self.content_blend = content_blend
         self.style_weight = style_weight
@@ -136,9 +136,9 @@ class job_scheduler(object):
                 style_row_path = style_row['image_file']
 
                 self.job_queue.put(job(j_id=row['id'],
-                                  path_to_im1= input_row_path,
-                                  path_to_im2= style_row_path,
-                                  output_path= row['output_image'],
+                                  im_name1= input_row_path,
+                                  im_name2= style_row_path,
+                                  output_name= row['output_image'],
                                   content_weight=row['content_weight'],
                                   content_blend=row['content_weight_blend'],
                                   style_weight=row['style_weight'],
@@ -199,7 +199,7 @@ class job_scheduler(object):
                                          'neural_style.py',
                                          '--content', '%s' % job_to_run.path1,
                                          '--styles', '%s' % job_to_run.path2,
-                                         '--output','%s' % job_to_run.out,
+                                         '--output','%s' % job_to_run.output_path,
                                          '--content-weight', job_to_run.content_weight,
                                          '--content-weight-blend', job_to_run.content_blend,
                                          '--style-weight', job_to_run.style_weight,
