@@ -3,13 +3,21 @@
 ## Current Progress: Step 1, 2, 3, 4, 5
 
 ## NOTES
+
 Need to change tensorflow script to allow_soft_placement = TRUE to automatically
-use an available gpu. Job scheduler handles gpu assignment to each command.
+use an available gpu. Job scheduler handles gpu assignment to each command. (EDIT: May not
+be necessary given that the CUDA_VISIBLE_DEVICES is already changed and tensorflow
+will automatically distribute based on the available GPU that can be seen.
 
 Django backend assumed to be sqlite3. Need to test on inputs.
 How to safely exit out of job scheduling?
 
 Start thinking about creating docker image and DL/UL for the website.
+
+Getting an error executing this command:
+python3 neural_style.py --content ../../deepstyleserver/dswebsite/images/circle1.png --styles ../../deepstyleserver/dswebsite/images/top.png --output ../../deepstyleserver/dswebsite/output_images/cc.png
+
+bad allocation 
 
 ## Running the program
 
