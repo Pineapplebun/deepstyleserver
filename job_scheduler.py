@@ -32,7 +32,8 @@ class job(object):
                  style_scale,
                  style_layer_weight_exp,
                  iterations,
-                 preserve_color):
+                 preserve_color,
+                 width):
 
         self.job_id = j_id
         self.path1 = "%s/%s" % (INPUT_FILE_PATH, im_name1)
@@ -44,6 +45,7 @@ class job(object):
         self.style_scale = style_scale
         self.style_layer_weight_exp = style_layer_weight_exp
         self.preserve_color = preserve_color
+        self.width = width
 
         if (iterations < 5000):
             self.iterations = iterations
@@ -145,7 +147,8 @@ class job_scheduler(object):
                                   style_scale=row['style_scale'],
                                   style_layer_weight_exp=row['style_layer_weight_exp'],
                                   iterations=row['iterations'],
-                                  preserve_color=row['preserve_color'])
+                                  preserve_color=row['preserve_color'],
+                                  width=row['output_width'])
                               )
 
                 # Set queue status of current row's id to be 'queued'
@@ -198,6 +201,7 @@ class job_scheduler(object):
                       '--style-layer-weight-exp', str(job_to_run.style_layer_weight_exp),
                       '--style-scales', str(job_to_run.style_scale),
                       '--iterations', str(job_to_run.iterations),
+                      '--width', str(job_to_run.width,
                       '--network', VGG_LOCATION
                      ]
             # set preserve colors if indicated
