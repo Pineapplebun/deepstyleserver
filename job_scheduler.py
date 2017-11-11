@@ -256,9 +256,10 @@ class job_scheduler(object):
                     self.gpu_free.put(completed_job.gpu)
 
                     # Change status of job in database
-                    c.execute("UPDATE deepstyle_job SET job_status='C' WHERE rowid = %s" % completed_job.job_id)
+                    if (exit_code == 0):
+                        c.execute("UPDATE deepstyle_job SET job_status='C' WHERE rowid = %s" % completed_job.job_id)
 
-                    self.logger.log.info(job_i)
+                    self.logger.log.info(str(job_i) + " Exit code: %d" % exit_code)
                     break
 
             # Completed_job only None if exit_code is None which means it's still running
