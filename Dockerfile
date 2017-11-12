@@ -11,7 +11,7 @@ WORKDIR /app/neural-style
 
 RUN apt-get update
 RUN apt-get install -y wget
-RUN wget http://www.vlfeat.org/matconvnet/models/beta16/imagenet-vgg-verydeep-19.mat
+# RUN wget http://www.vlfeat.org/matconvnet/models/beta16/imagenet-vgg-verydeep-19.mat
 
 EXPOSE 8000
 
