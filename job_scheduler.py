@@ -128,7 +128,7 @@ class job_scheduler(object):
         while row is not None:
             try:
 
-                s = self.db.cursor()
+                s = self.db.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
                 s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['input_image_id'])
                 input_row = s.fetchone() input_row_path = input_row['image_file']
@@ -160,7 +160,7 @@ class job_scheduler(object):
             except Exception as e:
                 self.logger.log.error("Job %d could not be set In Progress" % row['id'])
                 self.logger.log.exception(e)
-                z = self.db.cursor()
+                z = self.db.cursor(cursor_factory=psycopg2.extras.DictCursor)
                 z.execute("UPDATE deepstyle_job SET job_status='F' WHERE rowid = %d" % row['id'])
 
             row = c.fetchone()
@@ -179,8 +179,6 @@ class job_scheduler(object):
         we do not want tensorflow to allocate memory from other gpus since it
         impedes the ability to run another process on a different gpu.
 
-        NOTE: NEED TO CHANGE THE TENSORFLOW EVALUATE SCRIPT TO ALLOW
-        SOFT PLACEMENT IN THE SESSION.
         """
         if not self.gpu_free.empty():
             job_to_run = self.job_queue.get()
@@ -218,7 +216,7 @@ class job_scheduler(object):
             except Exception as e:
                 self.logger.log.error("Job %d could not be assigned GPU %d." % (job_to_run.job_id, job_to_run.gpu))
                 self.logger.log.exception(e)
-                c = self.db.cursor()
+                c = self.db.cursor(cursor_factory=psycopg2.extras.DictCursor)
                 c.execute("UPDATE deepstyle_job SET job_status='PF' WHERE rowid = %d" % job_to_run.job_id)
                 self.gpu_free.put(job_to_run.gpu)
 
@@ -239,7 +237,7 @@ class job_scheduler(object):
                     self.assign_gpu_and_run()
 
             completed_job = None
-            c = self.db.cursor()
+            c = self.db.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
             # Need to set exit code to 0 since if no job then we won't exec
             # the error handling and if there is a job it won't matter.
