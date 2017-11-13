@@ -8,20 +8,29 @@ services:
     volumes:
       - ./dswebsite:/app/dswebsite
       - ./nginx:/etc/nginx/conf.d
+      - ./dswebsite/deepstyle/static:/app/static
     depends_on:
       - web
 
   web:
     build: .
     container_name: dg01
-    command: bash -c "python manage.py makemigrations && python manage.py migrate && gunicorn dswebsite.wsgi -b 0.0.0.0:8000"
+    command: bash -c "python /app/dswebsite/manage.py makemigrations && python /app/dswebsite/manage.py migrate && cd dswebsite && gunicorn dswebsite.wsgi -b 0.0.0.0:8000"
     depends_on:
       - db
     volumes:
       - ./dswebsite:/app/dswebsite
+      - ./dswebsite/deepstyle/static:/app/static
     expose:
       - "8000"
 
   db:
     image: postgres:latest
     container_name: ps01
+    restart: always
+    environment:
+      - POSTGRES_USER=test
+      - POSTGRES_PASSWORD=test
+      - POSTGRES_DB=test_db
+    ports:
+      - "5431:5432"
