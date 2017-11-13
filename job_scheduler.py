@@ -121,6 +121,7 @@ class job_scheduler(object):
         c.execute("SELECT * FROM deepstyle_job WHERE job_status='Q'")
 
         row = c.fetchone()
+        print (type(row), row, row['id'])
         while row is not None:
             try:
 
