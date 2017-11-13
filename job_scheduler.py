@@ -131,7 +131,8 @@ class job_scheduler(object):
                 s = self.db.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
                 s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['input_image_id'])
-                input_row = s.fetchone() input_row_path = input_row['image_file']
+                input_row = s.fetchone()
+                input_row_path = input_row['image_file']
 
                 s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['style_image_id'])
                 style_row = s.fetchone()
