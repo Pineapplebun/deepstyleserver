@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 class Image(models.Model):
     image_name = models.CharField(max_length = 500)
     image_description = models.TextField(default = "Just another image")
-    image_path = models.FileField()
+    image_file = models.ImageField()
 
     # image type
     INPUT_IMAGE = 'I'
@@ -30,14 +30,7 @@ class Job(models.Model):
 
     input_image = models.ForeignKey(Image, blank = False, null = "False", related_name='+')
     style_image = models.ForeignKey(Image, blank = False, null = "False",  related_name='+')
-    output_image = models.ForeignKey(
-        Image,
-        models.SET_NULL,
-        blank = True,
-        null = True,
-        related_name='+'
-    )
-
+    output_image = models.CharField(max_length = 100, blank = True, null = True)
 
     # parameters for running a job
     # TOFIX: add more restricted limit to each param?
@@ -46,9 +39,10 @@ class Job(models.Model):
     content_weight = models.FloatField(default = 5e0)
     content_weight_blend = models.FloatField(default = 1)
     style_weight = models.FloatField(default = 5e2)
+    style_scale = models.FloatField(default = 1.0)
     learning_rate = models.FloatField(default = 1e1)
     style_layer_weight_exp = models.FloatField(default = 1)
-    perserve_color = models.BooleanField(default = False)
+    preserve_color = models.BooleanField(default = False)
 
     # pooling
     POOLING_OPTIONS = (
@@ -61,12 +55,16 @@ class Job(models.Model):
     QUEUED = 'Q'
     INPROGRESS = 'P'
     COMPLETED = 'C'
+    FAIL = 'F'
+    PROGRESS_FAIL = 'PF'
     JOB_STATUS_OPTIONS = (
         (QUEUED, "Queued"),
         (INPROGRESS, "In Progress"),
-        (COMPLETED, "Completed")
+        (COMPLETED, "Completed"),
+        (FAIL, "Failed"),
+        (PROGRESS_FAIL, "Progress Failed"),
     )
-    job_status = models.CharField(max_length = 1, choices = JOB_STATUS_OPTIONS, default = QUEUED)
+    job_status = models.CharField(max_length = 2, choices = JOB_STATUS_OPTIONS, default = QUEUED)
 
     # job times
     job_added = models.DateTimeField(default = datetime.now)

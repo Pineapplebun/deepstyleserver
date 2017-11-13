@@ -25,7 +25,7 @@ SECRET_KEY = 'ku^pkk*b0g9eor-%nh=81jbpg()5&8b7&j*+-w(!tz(^4)l#s-'
 # TOFIX: SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['web']
 
 
 # Application definition
@@ -75,22 +75,22 @@ WSGI_APPLICATION = 'dswebsite.wsgi.application'
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
 # Using sqlite
-DATABASES = {
+DATABASES_backup= {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
 
-# Using mysql
-DATABASES_BACKUP = {
+# Using postgresql
+DATABASES= {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'deepstyle',
-        'USER': 'root',
-        'PASSWORD': 'password',
-        'HOST': '',
-        'PORT': ''
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'test_db',
+	'PASSWORD': 'test',
+        'USER': 'test',
+        'HOST': 'db',
+        'PORT': 5432,
     }
 }
 
@@ -130,7 +130,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_ROOT = '/app/static/'
+STATIC_URL = '/app/static/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'images')
 MEDIA_URL = '/images/'

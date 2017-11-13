@@ -1,6 +1,10 @@
-import queue, sqlite3, logging, os, sys
+import queue, sqlite3, psycopg2, logging, os, sys
 from subprocess import Popen
+from psycopg2 import extras
 
+INPUT_FILE_PATH="/app/dswebsite/images"
+OUTPUT_FILE_PATH="/app/dswebsite/output_images"
+VGG_LOCATION="/app/neural-style/imagenet-vgg-verydeep-19.mat"
 """
 A job that contains information about the POST request.
 Required information:
@@ -19,28 +23,30 @@ preserve_color : bool
 """
 class job(object):
     def __init__(self,
-                 entry_id,
-                 path_to_im1,
-                 path_to_im2,
-                 output_path,
+                 j_id,
+                 im_name1,
+                 im_name2,
+                 output_name,
                  content_weight,
                  content_blend,
                  style_weight,
                  style_scale,
                  style_layer_weight_exp,
                  iterations,
-                 preserve_colors):
+                 preserve_color,
+                 width):
 
-        self.job_id = entry_id
-        self.path1 = path_to_im1
-        self.path2 = path_to_im2
-        self.out = output_path
+        self.job_id = j_id
+        self.path1 = "%s/%s" % (INPUT_FILE_PATH, im_name1)
+        self.path2 = "%s/%s" % (INPUT_FILE_PATH, im_name2)
+        self.output_path = "%s/job_%d.jpg" % (OUTPUT_FILE_PATH, j_id)
         self.content_weight = content_weight
         self.content_blend = content_blend
         self.style_weight = style_weight
         self.style_scale = style_scale
         self.style_layer_weight_exp = style_layer_weight_exp
-        self.preserve_colors = preserve_colors
+        self.preserve_color = preserve_color
+        self.width = width
 
         if (iterations < 5000):
             self.iterations = iterations
@@ -51,7 +57,7 @@ class job(object):
         self.finished = None
 
     def __str__(self):
-        return "%s : %s : %s" % (self.path1, self.path2, self.out)
+        return "%s : %s : %s" % (self.path1, self.path2, self.output_path)
 
 class logger(object):
     """
@@ -72,6 +78,9 @@ class logger(object):
         self.ch.setFormatter(formatter)
         self.fh.setFormatter(formatter)
 
+        self.log.addHandler(self.fh)
+        self.log.addHandler(self.ch)
+
     def shutdown(self):
         logging.shutdown()
 
@@ -91,8 +100,8 @@ class job_scheduler(object):
         self.job_queue = queue.Queue()
 
         try:
-            self.db = sqlite3.connect(name_db)
-            self.db.row_factory = sqlite3.Row
+            # self.db = sqlite3.connect(name_db)
+            self.db = psycopg2.connect("dbname='test_db' user='test' host='db' password='test'")
         except Exception as e:
             print(e)
             sys.exit()
@@ -107,36 +116,55 @@ class job_scheduler(object):
         Retrieve the unqueued jobs, create job objects and queue them
         to the job_queue. Modify the job as 'queued' in the database.
         """
-        c = self.db.cursor()
+        c = self.db.cursor(cursor_factory=psycopg2.extras.DictCursor)
         new_job_exists = False
         c.execute("SELECT * FROM deepstyle_job WHERE job_status='Q'")
 
         # checking
         #if len(c.fetchall()) == 0:
         #    print("cannot find any jobs")
+
         row = c.fetchone()
         while row is not None:
+            try:
 
-            self.job_queue.put(job(entry_id=row['id'],
-                              path_to_im1=row['input_image_path'],
-                              path_to_im2=row['style_image_path'],
-                              output_path=row['output_image_path'],
-                              content_weight=row['content_weight'],
-                              content_blend=row['content_weight_blend'],
-                              style_weight=row['style_weight'],
-                              style_scale=row['style_scale'],
-                              style_layer_weight_exp=row['style_layer_weight_exp'],
-                              iterations=row['iterations'],
-                              preserve_colors=row['preserve_colors'])
-                          )
+                s = self.db.cursor()
+
+                s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['input_image_id'])
+                input_row = s.fetchone() input_row_path = input_row['image_file']
+
+                s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['style_image_id'])
+                style_row = s.fetchone()
+                style_row_path = style_row['image_file']
+
+                self.job_queue.put(job(j_id=row['id'],
+                                  im_name1= input_row_path,
+                                  im_name2= style_row_path,
+                                  output_name= row['output_image'],
+                                  content_weight=row['content_weight'],
+                                  content_blend=row['content_weight_blend'],
+                                  style_weight=row['style_weight'],
+                                  style_scale=row['style_scale'],
+                                  style_layer_weight_exp=row['style_layer_weight_exp'],
+                                  iterations=row['iterations'],
+                                  preserve_color=row['preserve_color'],
+                                  width=row['output_width'])
+                              )
+
+                # Set queue status of current row's id to be 'queued'
+                c.execute("UPDATE deepstyle_job SET job_status='P' WHERE rowid = %d" % row['id'])
+                new_job_exists = True
+                self.logger.log.info("Job %d set In Progress" % row['id'])
 
 
-            # Set queue status of current row's id to be 'queued'
-            c.execute("UPDATE deepstyle_job SET job_status='P' WHERE rowid = %d" % row['id'])
-            new_job_exists = True
-            self.logger.log.info("Job %d set In Progress" % row['id'])
-            print("ran create")
+            except Exception as e:
+                self.logger.log.error("Job %d could not be set In Progress" % row['id'])
+                self.logger.log.exception(e)
+                z = self.db.cursor()
+                z.execute("UPDATE deepstyle_job SET job_status='F' WHERE rowid = %d" % row['id'])
+
             row = c.fetchone()
+
         c.close()
 
         if new_job_exists:
@@ -154,45 +182,51 @@ class job_scheduler(object):
         NOTE: NEED TO CHANGE THE TENSORFLOW EVALUATE SCRIPT TO ALLOW
         SOFT PLACEMENT IN THE SESSION.
         """
-        if not gpu_free.empty():
+        if not self.gpu_free.empty():
             job_to_run = self.job_queue.get()
-            job_to_run.gpu = gpu_free.get()
+            job_to_run.gpu = self.gpu_free.get()
 
             # Create a copy of the environemnt
             new_env = os.environ.copy()
             new_env['CUDA_VISIBLE_DEVICES'] = str(job_to_run.gpu)
 
+            params = ['python',
+                      '/app/neural-style/neural_style.py',
+                      '--content', '%s' % job_to_run.path1,
+                      '--styles', '%s' % job_to_run.path2,
+                      '--output','%s' % job_to_run.output_path,
+                      '--content-weight', str(job_to_run.content_weight),
+                      '--content-weight-blend', str(job_to_run.content_blend),
+                      '--style-weight', str(job_to_run.style_weight),
+                      '--style-layer-weight-exp', str(job_to_run.style_layer_weight_exp),
+                      '--style-scales', str(job_to_run.style_scale),
+                      '--iterations', str(job_to_run.iterations),
+                      '--width', str(job_to_run.width,
+                      '--network', VGG_LOCATION
+                     ]
             # set preserve colors if indicated
             # assuming that preserve_colors will be of type boolean
-            if job_to_run.preserve_colors:
-                preserve = ''
-            else:
-                preserve = '--preserve-colors'
+            if job_to_run.preserve_color:
+                params.append('--preserve-colors')
 
             # Run the subprocess
-            job_to_run.proc = Popen(['python',
-                                     'neural_style.py',
-                                     '--content', '%s' % job_to_run.path1,
-                                     '--styles', '%s' % job_to_run.path2,
-                                     '--output','%s' % job_to_run.out,
-                                     '--content-weight', job_to_run.content_weight,
-                                     '--content-weight-blend', job_to_run.content_blend,
-                                     '--style-weight', job_to_run.style_weight,
-                                     '--style-layer-weight-exp', job_to_run.style_layer_weight_exp,
-                                     '--style-scales', job_to_run.style_scale,
-                                     '--iterations', job_to_run.iterations,
-                                     '%s' % preserve
-                                     ], env=new_env)
+            try:
+                job_to_run.proc = Popen(params, env=new_env)
+                self.logger.log.info("Job %d assigned GPU %d." % (job_to_run.job_id, job_to_run.gpu))
+                self.running_jobs.append(job_to_run)
 
-            self.logger.log.info("Job %d assigned GPU %d." % (job_to_run.job_id, job_to_run.gpu))
-            print("ran assign")
-            # Append the job to the running_job list
-            running_procs.append(job_to_run)
+            except Exception as e:
+                self.logger.log.error("Job %d could not be assigned GPU %d." % (job_to_run.job_id, job_to_run.gpu))
+                self.logger.log.exception(e)
+                c = self.db.cursor()
+                c.execute("UPDATE deepstyle_job SET job_status='PF' WHERE rowid = %d" % job_to_run.job_id)
+                self.gpu_free.put(job_to_run.gpu)
+
 
     def main(self):
         """
-        Create a pool of processes equivalent to the number of gpus
-        Need async multiprocessing here...
+        The main method to run to check, assign and run jobs.
+
         """
         while True:
             # When a new job exists in the database, create a job and load
@@ -201,34 +235,44 @@ class job_scheduler(object):
 
             # When a job exists in the job queue
             if not self.job_queue.empty():
-                print("job queue is not empty")
-                while not gpu_free.empty():
+                while not self.gpu_free.empty():
                     self.assign_gpu_and_run()
 
-            # Check the processes that are running
-            # If proccesses are still running then this loop will continue to
-            # run until a process is finished. Once a process has finished,
-            # we can check if any requests are made and then create jobs from
-            # them and we can check if any jobs are waiting. GPU bound.
             completed_job = None
             c = self.db.cursor()
+
+            # Need to set exit code to 0 since if no job then we won't exec
+            # the error handling and if there is a job it won't matter.
             exit_code = 0
+
+            # Loop will run until a job is finished
             for job_i in self.running_jobs:
+
+                # job.proc could be None if the process doesn't exist
+                # but this is mitigated since no job in running_jobs will
+                # ever have None in its proc attribute
                 exit_code = job_i.proc.poll()
                 if exit_code is not None:
-                    completed_job = running_procs.remove(job_i)
-                    gpu_free.put(completed_job.gpu)
+                    completed_job = job_i
+                    # It is okay to remove this job from running_jobs because it will
+                    # break in this if statement anyways
+                    self.running_jobs.remove(job_i)
+                    self.gpu_free.put(completed_job.gpu)
 
                     # Change status of job in database
-                    c.execute("UPDATE deepstyle_job SET job_status='C' WHERE rowid = %s" % row['id'])
+                    if (exit_code == 0):
+                        c.execute("UPDATE deepstyle_job SET job_status='C' WHERE rowid = %s" % completed_job.job_id)
 
-                    self.logger.log.info(job_i)
+                    self.logger.log.info(str(job_i) + " Exit code: %d" % exit_code)
                     break
 
+            # Completed_job only None if exit_code is None which means it's still running
+            # If exit_code is not 0, then an error has occurred.
             if exit_code != 0 and completed_job is not None:
-                print("Error in Popen")
-                c.execute("UPDATE deepstyle_job SET job_status='F' WHERE rowid = %s" % row['id'])
-                self.logger.log.error(job_i)
+
+                # Remove job from executing by setting status to F
+                c.execute("UPDATE deepstyle_job SET job_status='F' WHERE rowid = %s" % completed_job.job_id)
+                self.logger.log.error(str(job_i) + " failed to complete.")
 
             # close cursor
             c.close()
