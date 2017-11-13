@@ -1,5 +1,6 @@
 import queue, sqlite3, psycopg2, logging, os, sys
 from subprocess import Popen
+from psycopg2 import extras
 
 INPUT_FILE_PATH="/app/dswebsite/images"
 OUTPUT_FILE_PATH="/app/dswebsite/output_images"
@@ -101,7 +102,6 @@ class job_scheduler(object):
         try:
             # self.db = sqlite3.connect(name_db)
             self.db = psycopg2.connect("dbname='test_db' user='test' host='db' password='test'")
-            self.db.row_factory = sqlite3.Row
         except Exception as e:
             print(e)
             sys.exit()
@@ -116,7 +116,7 @@ class job_scheduler(object):
         Retrieve the unqueued jobs, create job objects and queue them
         to the job_queue. Modify the job as 'queued' in the database.
         """
-        c = self.db.cursor()
+        c = self.db.cursor(cursor_factory=psycopg2.extras.DictCursor)
         new_job_exists = False
         c.execute("SELECT * FROM deepstyle_job WHERE job_status='Q'")
 
@@ -131,8 +131,7 @@ class job_scheduler(object):
                 s = self.db.cursor()
 
                 s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['input_image_id'])
-                input_row = s.fetchone()
-                input_row_path = input_row['image_file']
+                input_row = s.fetchone() input_row_path = input_row['image_file']
 
                 s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['style_image_id'])
                 style_row = s.fetchone()
