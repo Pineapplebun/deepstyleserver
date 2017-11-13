@@ -1,4 +1,4 @@
-import queue, sqlite3, logging, os, sys
+import queue, sqlite3, psycopg2, logging, os, sys
 from subprocess import Popen
 
 INPUT_FILE_PATH="/app/dswebsite/images"
@@ -99,7 +99,8 @@ class job_scheduler(object):
         self.job_queue = queue.Queue()
 
         try:
-            self.db = sqlite3.connect(name_db)
+            # self.db = sqlite3.connect(name_db)
+            self.db = psycopg2.connect("dbname='test_db' user='test' host='db' password='test'")
             self.db.row_factory = sqlite3.Row
         except Exception as e:
             print(e)
