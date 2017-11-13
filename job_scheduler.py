@@ -150,7 +150,7 @@ class job_scheduler(object):
                               )
 
                 # Set queue status of current row's id to be queued 'Q'.
-                c.execute("UPDATE deepstyle_job SET job_status='P' WHERE rowid = %d" % row['id'])
+                c.execute("UPDATE deepstyle_job SET job_status='P' WHERE id = %d" % row['id'])
                 new_job_exists = True
                 self.logger.log.info("Job %d set In Progress" % row['id'])
 
@@ -161,7 +161,10 @@ class job_scheduler(object):
                 z = self.db.cursor()
                 z.execute("UPDATE deepstyle_job SET job_status='F' WHERE id = %d" % row['id'])
 
-            row = c.fetchone()
+            try:
+                row = c.fetchone()
+            except:
+                break
 
         c.close()
 
