@@ -92,7 +92,7 @@ When the job is finished running, it will be removed from the CURRENT_RUNNING
 list. The data from the job will be recorded.
 """
 class job_scheduler(object):
-    def __init__(self, num_gpus, name_db):
+    def __init__(self, num_gpus):
         self.logger = logger()
         self.num_gpus = num_gpus
         self.gpu_free = queue.Queue()
@@ -277,6 +277,6 @@ class job_scheduler(object):
 
 if __name__ == '__main__':
 
-    js = job_scheduler(num_gpus=int(sys.argv[1]), name_db=sys.argv[2])
+    js = job_scheduler(num_gpus=int(sys.argv[1]))
 
     js.main()
