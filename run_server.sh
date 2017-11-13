@@ -34,4 +34,5 @@ sudo pip install nvidia-docker-compose
 # -p is port, -d is detach, -it is interactive terminal
 # CPU and web server: docker run -p 80:80 -v /..folder../src/:/var/www/html
 
-nvidia-docker-compose up
+nvidia-docker-compose build
+nvidia-docker-compose up -d
