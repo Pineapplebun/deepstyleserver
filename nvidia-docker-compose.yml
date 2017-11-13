@@ -1,0 +1,58 @@
+services:
+  db:
+    container_name: ps01
+    devices:
+    - /dev/nvidia0
+    - /dev/nvidiactl
+    - /dev/nvidia-uvm
+    - /dev/nvidia-uvm-tools
+    environment:
+    - POSTGRES_USER=test
+    - POSTGRES_PASSWORD=test
+    - POSTGRES_DB=test_db
+    image: postgres:latest
+    ports:
+    - 5431:5432
+    restart: always
+    volumes:
+    - nvidia_driver_381.22:/usr/local/nvidia:ro
+  nginx:
+    container_name: ng01
+    depends_on:
+    - web
+    devices:
+    - /dev/nvidia0
+    - /dev/nvidiactl
+    - /dev/nvidia-uvm
+    - /dev/nvidia-uvm-tools
+    image: nginx:latest
+    ports:
+    - 8000:8000
+    volumes:
+    - ./dswebsite:/app/dswebsite
+    - ./nginx:/etc/nginx/conf.d
+    - ./dswebsite/deepstyle/static:/app/static
+    - ./dswebsite/deepstyle/media:/app/media
+    - nvidia_driver_381.22:/usr/local/nvidia:ro
+  web:
+    build: .
+    command: bash /app/start_app_wrapper.sh
+    container_name: dg01
+    depends_on:
+    - db
+    devices:
+    - /dev/nvidia0
+    - /dev/nvidiactl
+    - /dev/nvidia-uvm
+    - /dev/nvidia-uvm-tools
+    expose:
+    - '8000'
+    volumes:
+    - ./dswebsite:/app/dswebsite
+    - ./dswebsite/deepstyle/static:/app/static
+    - ./dswebsite/deepstyle/media:/app/media
+    - nvidia_driver_381.22:/usr/local/nvidia:ro
+version: '2'
+volumes:
+  nvidia_driver_381.22:
+    external: true

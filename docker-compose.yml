@@ -9,6 +9,7 @@ services:
       - ./dswebsite:/app/dswebsite
       - ./nginx:/etc/nginx/conf.d
       - ./dswebsite/deepstyle/static:/app/static
+      - ./dswebsite/deepstyle/media:/app/media
     depends_on:
       - web
 
@@ -21,6 +22,7 @@ services:
     volumes:
       - ./dswebsite:/app/dswebsite
       - ./dswebsite/deepstyle/static:/app/static
+      - ./dswebsite/deepstyle/media:/app/media
     expose:
       - "8000"
 
