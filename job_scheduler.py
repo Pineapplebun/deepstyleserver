@@ -2,13 +2,13 @@ import queue, psycopg2, logging, os, sys
 from subprocess import Popen
 from psycopg2 import extras
 
-INPUT_FILE_PATH="/app/dswebsite/images"
-OUTPUT_FILE_PATH="/app/dswebsite/output_images"
+INPUT_FILE_PATH="/app/media"
+OUTPUT_FILE_PATH="/app/media"
 VGG_LOCATION="/app/neural-style/imagenet-vgg-verydeep-19.mat"
 """
-A job that contains information about the POST request.
-Required information:
+A job that contains information about the POST request entry.
 
+Required information:
 job_id : int
 path1 : str
 path2 : str
@@ -47,10 +47,10 @@ class job(object):
         self.preserve_color = preserve_color
         self.width = width
 
-        if (iterations < 5000):
+        if (iterations < 2001):
             self.iterations = iterations
         else:
-            self.iterations = 5000
+            self.iterations = 1000
         self.gpu = None
         self.proc = None
         self.finished = None
@@ -120,27 +120,23 @@ class job_scheduler(object):
         new_job_exists = False
         c.execute("SELECT * FROM deepstyle_job WHERE job_status='Q'")
 
-        # checking
-        #if len(c.fetchall()) == 0:
-        #    print("cannot find any jobs")
-
         row = c.fetchone()
         while row is not None:
             try:
 
                 s = self.db.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-                s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['input_image_id'])
-                input_row = s.fetchone()
-                input_row_path = input_row['image_file']
+                #s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['input_image_id'])
+                #input_row = s.fetchone()
+                #input_row_path = input_row['image_file']
 
-                s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['style_image_id'])
-                style_row = s.fetchone()
-                style_row_path = style_row['image_file']
+                #s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['style_image_id'])
+                #style_row = s.fetchone()
+                #style_row_path = style_row['image_file']
 
                 self.job_queue.put(job(j_id=row['id'],
-                                  im_name1= input_row_path,
-                                  im_name2= style_row_path,
+                                  im_name1= row['input_image'], #input_row_path,
+                                  im_name2= row['style_image'], #style_row_path,
                                   output_name= row['output_image'],
                                   content_weight=row['content_weight'],
                                   content_blend=row['content_weight_blend'],
@@ -152,7 +148,7 @@ class job_scheduler(object):
                                   width=row['output_width'])
                               )
 
-                # Set queue status of current row's id to be 'queued'
+                # Set queue status of current row's id to be queued 'Q'.
                 c.execute("UPDATE deepstyle_job SET job_status='P' WHERE rowid = %d" % row['id'])
                 new_job_exists = True
                 self.logger.log.info("Job %d set In Progress" % row['id'])
@@ -225,7 +221,6 @@ class job_scheduler(object):
     def main(self):
         """
         The main method to run to check, assign and run jobs.
-
         """
         while True:
             # When a new job exists in the database, create a job and load

@@ -1,9 +1,10 @@
 #!/bin/sh
 
 # Install Docker CE and replace ec2-user
+# The first argument of this script is the ec2-user
 sudo apt-get update
 sudo apt-get install -y docker-ce
-sudo usermod -a -G docker ec2-user
+sudo usermod -a -G docker $1
 
 # Install Nvidia Drivers
 sudo add-apt-repository ppa:graphics-drivers/ppa -y
@@ -32,9 +33,5 @@ sudo pip install nvidia-docker-compose
 # Build Docker Container and run it
 # -p is port, -d is detach, -it is interactive terminal
 # CPU and web server: docker run -p 80:80 -v /..folder../src/:/var/www/html
-
-## CHANGE THIS TO USE NVIDIA-DOCKER-COMPOSE
-#nvidia-docker build -t deepstyleapp .
-#nvidia-docker run -p 8000:8000 -d -it --name=server1 deepstyleapp sh /app/start_app_wrapper.sh
 
 nvidia-docker-compose up
