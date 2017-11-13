@@ -159,7 +159,7 @@ class job_scheduler(object):
                 self.logger.log.error("Job %d could not be set In Progress" % row['id'])
                 self.logger.log.exception(e)
                 z = self.db.cursor()
-                z.execute("UPDATE deepstyle_job SET job_status='F' WHERE rowid = %d" % row['id'])
+                z.execute("UPDATE deepstyle_job SET job_status='F' WHERE id = %d" % row['id'])
 
             row = c.fetchone()
 
@@ -198,8 +198,8 @@ class job_scheduler(object):
                       '--style-scales', str(job_to_run.style_scale),
                       '--iterations', str(job_to_run.iterations),
                       '--width', str(job_to_run.width),
-                      '--network', VGG_LOCATION
-                     ]
+                      '--network', VGG_LOCATION ]
+
             # set preserve colors if indicated
             # assuming that preserve_colors will be of type boolean
             if job_to_run.preserve_color:
@@ -215,7 +215,7 @@ class job_scheduler(object):
                 self.logger.log.error("Job %d could not be assigned GPU %d." % (job_to_run.job_id, job_to_run.gpu))
                 self.logger.log.exception(e)
                 c = self.db.cursor()
-                c.execute("UPDATE deepstyle_job SET job_status='PF' WHERE rowid = %d" % job_to_run.job_id)
+                c.execute("UPDATE deepstyle_job SET job_status='PF' WHERE id = %d" % job_to_run.job_id)
                 self.gpu_free.put(job_to_run.gpu)
 
 
@@ -256,7 +256,7 @@ class job_scheduler(object):
 
                     # Change status of job in database
                     if (exit_code == 0):
-                        c.execute("UPDATE deepstyle_job SET job_status='C' WHERE rowid = %s" % completed_job.job_id)
+                        c.execute("UPDATE deepstyle_job SET job_status='C' WHERE id = %s" % completed_job.job_id)
 
                     self.logger.log.info(str(job_i) + " Exit code: %d" % exit_code)
                     break
@@ -266,7 +266,7 @@ class job_scheduler(object):
             if exit_code != 0 and completed_job is not None:
 
                 # Remove job from executing by setting status to F
-                c.execute("UPDATE deepstyle_job SET job_status='F' WHERE rowid = %s" % completed_job.job_id)
+                c.execute("UPDATE deepstyle_job SET job_status='F' WHERE id = %s" % completed_job.job_id)
                 self.logger.log.error(str(job_i) + " failed to complete.")
 
             # close cursor
