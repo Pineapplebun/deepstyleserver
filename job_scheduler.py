@@ -196,7 +196,7 @@ class job_scheduler(object):
                       '--style-layer-weight-exp', str(job_to_run.style_layer_weight_exp),
                       '--style-scales', str(job_to_run.style_scale),
                       '--iterations', str(job_to_run.iterations),
-                      '--width', str(job_to_run.width,
+                      '--width', str(job_to_run.width),
                       '--network', VGG_LOCATION
                      ]
             # set preserve colors if indicated
