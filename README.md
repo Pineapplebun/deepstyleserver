@@ -6,10 +6,9 @@
 
 Start thinking about DL/UL for the website and transferring images from server to server.
 
-Getting an error executing this command:
-python3 neural_style.py --content ../../deepstyleserver/dswebsite/images/circle1.png --styles ../../deepstyleserver/dswebsite/images/top.png --output ../../deepstyleserver/dswebsite/output_images/cc.png
+Create front end and user authentication
+Test on multi GPUs on EC2 and Create an EBS with all dependencies installed
 
-Resolved by setting the '--width' argument.
 
 ## Running the program
 
@@ -18,8 +17,7 @@ libraries installed in the AWS instance. This script will also automatically
 start the app if it succeeds. If these dependencies have already been installed
 and the docker container has already been build, then we can just run:
 
-nvidia-docker run -p 8000:8000 -d -it deepstyleapp sh /app/start_app_wrapper.sh
-
+nvidia-docker-compose
 to start the app.
 
 We can check for jobs and errors in the js_logger.txt file.
@@ -28,7 +26,7 @@ We can check for jobs and errors in the js_logger.txt file.
 
 The web app consists of:
 
-1. Django backend with a (SQLite?) database
+1. Django backend with a PostgreSQL database
 2. Python job scheduling script
 3. Input/Output in Frontend and Backend
 4. Dataflow for Neural Style Transfer
