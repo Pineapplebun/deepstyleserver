@@ -32,6 +32,7 @@ services:
     - ./dswebsite:/app/dswebsite
     - ./nginx:/etc/nginx/conf.d
     - ./dswebsite/deepstyle/static:/app/static
+    - ./dswebsite/deepstyle/media:/app/media
     - nvidia_driver_381.22:/usr/local/nvidia:ro
   web:
     build: .
@@ -49,6 +50,7 @@ services:
     volumes:
     - ./dswebsite:/app/dswebsite
     - ./dswebsite/deepstyle/static:/app/static
+    - ./dswebsite/deepstyle/media:/app/media
     - nvidia_driver_381.22:/usr/local/nvidia:ro
 version: '2'
 volumes:
