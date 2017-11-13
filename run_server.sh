@@ -25,13 +25,13 @@ sudo dpkg -i /tmp/nvidia-docker*.deb && rm /tmp/nvidia-docker*.deb
 # Test if docker is using nvidia GPUs
 nvidia-docker run — rm nvidia/cuda nvidia-smi
 
+# Install NVIDIA-DOCKER-COMPOSE
+sudo pip install nvidia-docker-compose
+
 
 # Build Docker Container and run it
 # -p is port, -d is detach, -it is interactive terminal
 # CPU and web server: docker run -p 80:80 -v /..folder../src/:/var/www/html
-# I think we need to change docker to nvidia-docker
-# If we need to leverage gpu
-
 
 ## CHANGE THIS TO USE NVIDIA-DOCKER-COMPOSE
 #nvidia-docker build -t deepstyleapp .
