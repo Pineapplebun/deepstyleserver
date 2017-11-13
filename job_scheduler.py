@@ -1,4 +1,4 @@
-import queue, sqlite3, psycopg2, logging, os, sys
+import queue, psycopg2, logging, os, sys
 from subprocess import Popen
 from psycopg2 import extras
 
@@ -18,8 +18,7 @@ content_blend : float
 style_weight : float
 style_scale : float
 style_layer_weight_exp : float
-preserve_color : bool
-
+preserve_color : bool (0 or 1)
 """
 class job(object):
     def __init__(self,
@@ -61,7 +60,7 @@ class job(object):
 
 class logger(object):
     """
-    Create a logger and write to console and file.
+    Create a logger and write to console and a file named "js_logger.txt".
     """
     def __init__(self):
         self.log = logging.getLogger()
@@ -85,11 +84,12 @@ class logger(object):
         logging.shutdown()
 
 """
-Job scheduler queries a POST REQUEST from the database and creates a job sent to
-the queue. If the job is first in the queue and there is gpu space, by checking a list of
-current processes, then we execute the job in shell and place the job in CURRENT_RUNNING.
-When the job is finished running, it will be removed from the CURRENT_RUNNING
-list. The data from the job will be recorded.
+Job scheduler queries a POST REQUEST entries from the database and creates jobs
+sent to the queue. If there exists a free gpu, then we execute a job from the
+queue in shell and place the job in CURRENT_RUNNING. The program will loop
+checking if the process exited has an exit code. When the job returns an exit
+code, it will be removed from the CURRENT_RUNNING list and the gpu number will
+be added back into the gpu_free queue.
 """
 class job_scheduler(object):
     def __init__(self, num_gpus):
