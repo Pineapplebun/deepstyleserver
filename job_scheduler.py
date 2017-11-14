@@ -250,7 +250,7 @@ class job_scheduler(object):
                 # gpu_free's size is greater than int(job_to_run.width)/1000
 
             for _ in range(num_gpus):
-                job_to_run.gpu = self.gpu.append(self.gpu_free.get())
+                job_to_run.gpu.append(self.gpu_free.get())
 
             # Create a copy of the environemnt
             new_env = os.environ.copy()
