@@ -110,7 +110,7 @@ class job_scheduler(object):
         for i in range(num_gpus):
             self.gpu_free.put(i)
 
-    def safe_execute_sql(self, string, opts=False, opts_params=(,), curs_fact=False):
+    def safe_execute_sql(self, string, opts=False, opts_params=None, curs_fact=False):
         """
         Returns a cursor if the SQL executed successfully.
         """
