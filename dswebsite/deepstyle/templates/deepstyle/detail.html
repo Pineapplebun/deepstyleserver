@@ -2,18 +2,19 @@
 
 {% block body %}
 
-	<h2>{{ job.id }} : {{ job.job_name }}</h2>
+	<h3>{{ job.id }} : {{ job.job_name }}</h3>
 
-	<h3>Input Image</h3>
-	<img src="./media/{{ job.input_image.image_path.url }}" alt="" width="100px" height="100px">
-	<img src="./media/hello.png" alt="" width="100px" height="100px">
-	<a href="{{ job.input_image.image_path.url }}" download>Download Image</a>
+	<strong>Input Image</strong>
+	<img src="{{ job.input_image.url }}" alt="Input Image" width="100%">
+	<a href="{{ job.input_image.url }}" download>Download Image</a>
 
-	<h3>Style Image</h3>
-	<img src="{{ job.style_image.image_path.url }}" alt="" width="100px" height="100px">
+	<strong>Style Image</strong>
+	<img src="{{ job.style_image.url }}" alt="Output Image" width="100%">
+	<a href="{{ job.style_image.url }}" download>Download Image</a>
 
-	<h3>Output Image</h3>
-	<img src="{{ job.output_image.image_path.url }}" alt="Image is still being processed" width="100px" height="100px">
+	<strong>Output Image</strong>
+	<img src="{{ job.output_image.url }}" alt="Image is still being processed" width="100%">
+	<a href="{{ job.output_image.url }}" download>Download Image</a>
 
 	<a href="{% url 'deepstyle:EditJob' job.id %}">Edit job name and details</a>
 
