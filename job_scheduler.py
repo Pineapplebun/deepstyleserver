@@ -1,13 +1,14 @@
-import queue, sqlite3, psycopg2, logging, os, sys
+import queue, psycopg2, logging, os, sys
 from subprocess import Popen
+from psycopg2 import extras
 
-INPUT_FILE_PATH="/app/dswebsite/images"
-OUTPUT_FILE_PATH="/app/dswebsite/output_images"
+INPUT_FILE_PATH="/app/media"
+OUTPUT_FILE_PATH="/app/media"
 VGG_LOCATION="/app/neural-style/imagenet-vgg-verydeep-19.mat"
 """
-A job that contains information about the POST request.
-Required information:
+A job that contains information about the POST request entry.
 
+Required information:
 job_id : int
 path1 : str
 path2 : str
@@ -17,8 +18,7 @@ content_blend : float
 style_weight : float
 style_scale : float
 style_layer_weight_exp : float
-preserve_color : bool
-
+preserve_color : bool (0 or 1)
 """
 class job(object):
     def __init__(self,
@@ -38,7 +38,7 @@ class job(object):
         self.job_id = j_id
         self.path1 = "%s/%s" % (INPUT_FILE_PATH, im_name1)
         self.path2 = "%s/%s" % (INPUT_FILE_PATH, im_name2)
-        self.output_path = "%s/job_%d.jpg" % (OUTPUT_FILE_PATH, j_id)
+        self.output_path = "%s/job_%d_%s_%s.jpg" % (OUTPUT_FILE_PATH, j_id, im_name1, im_name2)
         self.content_weight = content_weight
         self.content_blend = content_blend
         self.style_weight = style_weight
@@ -47,10 +47,10 @@ class job(object):
         self.preserve_color = preserve_color
         self.width = width
 
-        if (iterations < 5000):
+        if (iterations < 2001):
             self.iterations = iterations
         else:
-            self.iterations = 5000
+            self.iterations = 1000
         self.gpu = None
         self.proc = None
         self.finished = None
@@ -60,7 +60,7 @@ class job(object):
 
 class logger(object):
     """
-    Create a logger and write to console and file.
+    Create a logger and write to console and a file named "js_logger.txt".
     """
     def __init__(self):
         self.log = logging.getLogger()
@@ -84,14 +84,15 @@ class logger(object):
         logging.shutdown()
 
 """
-Job scheduler queries a POST REQUEST from the database and creates a job sent to
-the queue. If the job is first in the queue and there is gpu space, by checking a list of
-current processes, then we execute the job in shell and place the job in CURRENT_RUNNING.
-When the job is finished running, it will be removed from the CURRENT_RUNNING
-list. The data from the job will be recorded.
+Job scheduler queries a POST REQUEST entries from the database and creates jobs
+sent to the queue. If there exists a free gpu, then we execute a job from the
+queue in shell and place the job in CURRENT_RUNNING. The program will loop
+checking if the process exited has an exit code. When the job returns an exit
+code, it will be removed from the CURRENT_RUNNING list and the gpu number will
+be added back into the gpu_free queue.
 """
 class job_scheduler(object):
-    def __init__(self, num_gpus, name_db):
+    def __init__(self, num_gpus):
         self.logger = logger()
         self.num_gpus = num_gpus
         self.gpu_free = queue.Queue()
@@ -114,7 +115,7 @@ class job_scheduler(object):
         Retrieve the unqueued jobs, create job objects and queue them
         to the job_queue. Modify the job as 'queued' in the database.
         """
-        c = self.db.cursor()
+        c = self.db.cursor(cursor_factory=psycopg2.extras.DictCursor)
         new_job_exists = False
         c.execute("SELECT * FROM deepstyle_job WHERE job_status='Q'")
 
@@ -124,19 +125,21 @@ class job_scheduler(object):
         while row is not None:
             try:
 
-                s = self.db.cursor()
+                #s = self.db.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-                s.execute("SELECT * FROM deepstyle_image WHERE id= %s", (row['input_image_id']))
-                input_row = s.fetchone()
-                input_row_path = input_row['image_file']
 
-                s.execute("SELECT * FROM deepstyle_image WHERE id= %s", (row['style_image_id']))
-                style_row = s.fetchone()
-                style_row_path = style_row['image_file']
+                #s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['input_image_id'])
+                #input_row = s.fetchone()
+                #input_row_path = input_row['image_file']
+
+                #s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['style_image_id'])
+                #style_row = s.fetchone()
+                #style_row_path = style_row['image_file']
+
 
                 self.job_queue.put(job(j_id=row['id'],
-                                  im_name1= input_row_path,
-                                  im_name2= style_row_path,
+                                  im_name1= row['input_image'], #input_row_path,
+                                  im_name2= row['style_image'], #style_row_path,
                                   output_name= row['output_image'],
                                   content_weight=row['content_weight'],
                                   content_blend=row['content_weight_blend'],
@@ -160,7 +163,10 @@ class job_scheduler(object):
                 z = self.db.cursor()
                 z.execute("UPDATE deepstyle_job SET job_status='F' WHERE id = %s", (row['id']))
 
-            row = c.fetchone()
+            try:
+                row = c.fetchone()
+            except:
+                break
 
         c.close()
 
@@ -176,8 +182,6 @@ class job_scheduler(object):
         we do not want tensorflow to allocate memory from other gpus since it
         impedes the ability to run another process on a different gpu.
 
-        NOTE: NEED TO CHANGE THE TENSORFLOW EVALUATE SCRIPT TO ALLOW
-        SOFT PLACEMENT IN THE SESSION.
         """
         if not self.gpu_free.empty():
             job_to_run = self.job_queue.get()
@@ -198,9 +202,9 @@ class job_scheduler(object):
                       '--style-layer-weight-exp', str(job_to_run.style_layer_weight_exp),
                       '--style-scales', str(job_to_run.style_scale),
                       '--iterations', str(job_to_run.iterations),
-                      '--width', str(job_to_run.width,
-                      '--network', VGG_LOCATION
-                     ]
+                      '--width', str(job_to_run.width),
+                      '--network', VGG_LOCATION ]
+
             # set preserve colors if indicated
             # assuming that preserve_colors will be of type boolean
             if job_to_run.preserve_color:
@@ -223,7 +227,6 @@ class job_scheduler(object):
     def main(self):
         """
         The main method to run to check, assign and run jobs.
-
         """
         while True:
             # When a new job exists in the database, create a job and load
