@@ -110,6 +110,7 @@ class job_scheduler(object):
         # gpu_0, gpu_1, etc.
         for i in range(num_gpus):
             self.gpu_free.put(i)
+
         self.logger.log.info("The number of free gpus is: " + str(self.gpu_free.qsize()))
 
     def safe_execute_sql(self, string, opts=False, opts_params=None, curs_fact=False):
@@ -348,8 +349,7 @@ class job_scheduler(object):
                     self.logger.log.info("The number of free gpus is: " + str(self.gpu_free.qsize()))
 
                     # Change status of job in database
-                    if (exit_code == 0):
-                        self.safe_execute_sql("UPDATE deepstyle_job SET job_status='C' WHERE id = (%s)", True, (str(completed_job.job_id),))
+                    self.safe_execute_sql("UPDATE deepstyle_job SET job_status='C' WHERE id = (%s)", True, (completed_job.job_id,))
                         #c.execute("UPDATE deepstyle_job SET job_status='C' WHERE id = (%s)", (completed_job.job_id,))
 
                     self.logger.log.info(str(job_i) + " Exit code: %d" % exit_code)
