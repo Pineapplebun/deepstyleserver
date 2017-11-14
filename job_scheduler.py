@@ -99,9 +99,7 @@ class job_scheduler(object):
         self.job_queue = queue.Queue()
 
         try:
-            # self.db = sqlite3.connect(name_db)
             self.db = psycopg2.connect("dbname='test_db' user='test' host='db' password='test'")
-            self.db.row_factory = sqlite3.Row
         except Exception as e:
             print(e)
             sys.exit()
@@ -120,21 +118,19 @@ class job_scheduler(object):
         new_job_exists = False
         c.execute("SELECT * FROM deepstyle_job WHERE job_status='Q'")
 
-        # checking
-        #if len(c.fetchall()) == 0:
-        #    print("cannot find any jobs")
 
         row = c.fetchone()
+
         while row is not None:
             try:
 
                 s = self.db.cursor()
 
-                s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['input_image_id'])
+                s.execute("SELECT * FROM deepstyle_image WHERE id= %s", (row['input_image_id']))
                 input_row = s.fetchone()
                 input_row_path = input_row['image_file']
 
-                s.execute("SELECT * FROM deepstyle_image WHERE rowid= %s" % row['style_image_id'])
+                s.execute("SELECT * FROM deepstyle_image WHERE id= %s", (row['style_image_id']))
                 style_row = s.fetchone()
                 style_row_path = style_row['image_file']
 
@@ -153,7 +149,7 @@ class job_scheduler(object):
                               )
 
                 # Set queue status of current row's id to be 'queued'
-                c.execute("UPDATE deepstyle_job SET job_status='P' WHERE rowid = %d" % row['id'])
+                c.execute("UPDATE deepstyle_job SET job_status='P' WHERE id = %s", (row['id']))
                 new_job_exists = True
                 self.logger.log.info("Job %d set In Progress" % row['id'])
 
@@ -162,7 +158,7 @@ class job_scheduler(object):
                 self.logger.log.error("Job %d could not be set In Progress" % row['id'])
                 self.logger.log.exception(e)
                 z = self.db.cursor()
-                z.execute("UPDATE deepstyle_job SET job_status='F' WHERE rowid = %d" % row['id'])
+                z.execute("UPDATE deepstyle_job SET job_status='F' WHERE id = %s", (row['id']))
 
             row = c.fetchone()
 
@@ -220,7 +216,7 @@ class job_scheduler(object):
                 self.logger.log.error("Job %d could not be assigned GPU %d." % (job_to_run.job_id, job_to_run.gpu))
                 self.logger.log.exception(e)
                 c = self.db.cursor()
-                c.execute("UPDATE deepstyle_job SET job_status='PF' WHERE rowid = %d" % job_to_run.job_id)
+                c.execute("UPDATE deepstyle_job SET job_status='PF' WHERE id = %s",            (job_to_run.job_id))
                 self.gpu_free.put(job_to_run.gpu)
 
 
@@ -262,7 +258,7 @@ class job_scheduler(object):
 
                     # Change status of job in database
                     if (exit_code == 0):
-                        c.execute("UPDATE deepstyle_job SET job_status='C' WHERE rowid = %s" % completed_job.job_id)
+                        c.execute("UPDATE deepstyle_job SET job_status='C' WHERE id = %s", (completed_job.job_id))
 
                     self.logger.log.info(str(job_i) + " Exit code: %d" % exit_code)
                     break
@@ -272,7 +268,7 @@ class job_scheduler(object):
             if exit_code != 0 and completed_job is not None:
 
                 # Remove job from executing by setting status to F
-                c.execute("UPDATE deepstyle_job SET job_status='F' WHERE rowid = %s" % completed_job.job_id)
+                c.execute("UPDATE deepstyle_job SET job_status='F' WHERE id = %s", (completed_job.job_id))
                 self.logger.log.error(str(job_i) + " failed to complete.")
 
             # close cursor
@@ -280,6 +276,6 @@ class job_scheduler(object):
 
 if __name__ == '__main__':
 
-    js = job_scheduler(num_gpus=int(sys.argv[1]), name_db=sys.argv[2])
+    js = job_scheduler(num_gpus=int(sys.argv[1]))
 
     js.main()
