@@ -51,7 +51,7 @@ class job(object):
             self.iterations = iterations
         else:
             self.iterations = 1000
-        self.gpu = None
+        self.gpu = []
         self.proc = None
         self.finished = None
 
@@ -101,9 +101,10 @@ class job_scheduler(object):
 
         try:
             self.db = psycopg2.connect("dbname='test_db' user='test' host='db' password='test'")
+            self.logger.log.info("Database connected!")
         except Exception as e:
-            print(e)
-            sys.exit()
+            self.logger.log(e)
+            self.reconnect_to_db()
 
         # Assuming that the gpu ranges from 0 to num_gpus - 1
         # gpu_0, gpu_1, etc.
@@ -128,7 +129,7 @@ class job_scheduler(object):
                     c.execute(string, opts_params)
 
                 return c
-            except Exception as e:
+            except psycopg2.OperationalError as e:
                 self.reconnect_to_db()
             i += 1
 
@@ -141,7 +142,7 @@ class job_scheduler(object):
                 sleep(5)
                 self.logger.info("... Reconnected!")
                 return
-            except Exception as e:
+            except psycopg2.OperationalError as e:
                 print(e)
                 self.logger.exception(e)
                 self.logger.info("Trying to reconnect in 10 seconds ...")
@@ -289,7 +290,7 @@ class job_scheduler(object):
             # Run the subprocess
             try:
                 job_to_run.proc = Popen(params, env=new_env)
-                self.logger.log.info("Job %d assigned GPU %s." % (job_to_run.job_id, job_to_run.gpu))
+                self.logger.log.info("Popen worked! Job %d assigned GPU %s." % (job_to_run.job_id, job_to_run.gpu))
                 self.running_jobs.append(job_to_run)
 
             except Exception as e:
@@ -311,10 +312,10 @@ class job_scheduler(object):
             # When a new job exists in the database, create a job and load
             # into the job queue.
             self.create_jobs_and_queue()
-            print(job_queue)
+
             # When a job exists in the job queue
             if not self.job_queue.empty():
-                #while not self.gpu_free.empty():
+
                 self.assign_gpu_and_run()
 
             completed_job = None
@@ -355,7 +356,6 @@ class job_scheduler(object):
                 self.safe_execute_sql("UPDATE deepstyle_job SET job_status='F' WHERE id = (%s)", True, (completed_job.job_id,))
                 #c.execute("UPDATE deepstyle_job SET job_status='F' WHERE id = (%s)", (completed_job.job_id,))
                 self.logger.log.error(str(job_i) + " failed to complete.")
-
 
 if __name__ == '__main__':
 
