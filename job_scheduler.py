@@ -51,7 +51,7 @@ class job(object):
             self.iterations = iterations
         else:
             self.iterations = 1000
-        self.gpu = None
+        self.gpu = []
         self.proc = None
         self.finished = None
 
