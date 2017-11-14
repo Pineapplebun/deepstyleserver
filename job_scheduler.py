@@ -1,4 +1,4 @@
-import queue, psycopg2, logging, os, sys
+import queue, psycopg2, logging, os, sys, time
 from subprocess import Popen
 from psycopg2 import extras
 
@@ -110,15 +110,55 @@ class job_scheduler(object):
         for i in range(num_gpus):
             self.gpu_free.put(i)
 
+    def safe_execute_sql(self, string, opts=False, opts_params=(,), curs_fact=False):
+        """
+        Returns a cursor if the SQL executed successfully.
+        """
+        max_tries = 10
+        i = 0
+        while i < max_tries:
+            try:
+                c = self.db.cursor()
+                if curs_fact:
+                    c = self.db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+                if not opts:
+                    c.execute(string)
+                else:
+                    c.execute(string, opts_params)
+                return c
+            except Exception as e:
+                self.reconnect_to_db()
+            i += 1
+
+
+
+    def reconnect_to_db(self):
+        max_tries = 1000
+        i = 0
+        while (i < max_tries):
+            try:
+                self.db = psycopg2.connect("dbname='test_db' user='test' host='db' password='test'")
+                sleep(5)
+                return
+            except Exception as e:
+                print(e)
+                self.logger.exception(e)
+                self.logger.info("Trying to reconnect in 10 seconds ...")
+            sleep(10)
+
+
+
     def create_jobs_and_queue(self):
         """
         Retrieve the unqueued jobs, create job objects and queue them
         to the job_queue. Modify the job as 'queued' in the database.
         """
-        c = self.db.cursor(cursor_factory=psycopg2.extras.DictCursor)
         new_job_exists = False
-        c.execute("SELECT * FROM deepstyle_job WHERE job_status='Q'")
 
+        #c = self.db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        #c.execute("SELECT * FROM deepstyle_job WHERE job_status='Q'")
+        c = self.safe_execute_sql("SELECT * FROM deepstyle_job WHERE job_status='Q'", curs_fact=True)
 
         row = c.fetchone()
 
@@ -139,7 +179,8 @@ class job_scheduler(object):
                               )
 
                 # Set queue status of current row's id to be 'queued'
-                c.execute("UPDATE deepstyle_job SET job_status='P' WHERE id = (%s)", (row['id'],))
+                self.safe_execute_sql("UPDATE deepstyle_job SET job_status='P' WHERE id = (%s)", True, (row['id'],))
+                # c.execute("UPDATE deepstyle_job SET job_status='P' WHERE id = (%s)", (row['id'],))
                 new_job_exists = True
                 self.logger.log.info("Job %d set In Progress" % row['id'])
 
@@ -147,8 +188,10 @@ class job_scheduler(object):
             except Exception as e:
                 self.logger.log.error("Job %d could not be set In Progress" % row['id'])
                 self.logger.log.exception(e)
-                z = self.db.cursor()
-                z.execute("UPDATE deepstyle_job SET job_status='F' WHERE id = (%s)", (row['id'],))
+
+                #z = self.db.cursor()
+                #z.execute("UPDATE deepstyle_job SET job_status='F' WHERE id = (%s)", (row['id'],))
+                self.safe_execute_sql("UPDATE deepstyle_job SET job_status='F' WHERE id = (%s)", True, (row['id'],))
 
             try:
                 row = c.fetchone()
@@ -253,8 +296,11 @@ class job_scheduler(object):
             except Exception as e:
                 self.logger.log.error("Job %d could not be assigned GPU %s." % (job_to_run.job_id, job_to_run.gpu))
                 self.logger.log.exception(e)
-                c = self.db.cursor()
-                c.execute("UPDATE deepstyle_job SET job_status='PF' WHERE id = (%s)", (job_to_run.job_id,))
+
+                #c = self.db.cursor()
+                #c.execute("UPDATE deepstyle_job SET job_status='PF' WHERE id = (%s)", (job_to_run.job_id,))
+                self.safe_execute_sql("UPDATE deepstyle_job SET job_status='PF' WHERE id = (%s)", True, (job_to_run.job_id,))
+
                 self.gpu_free.put(job_to_run.gpu)
 
 
@@ -297,7 +343,8 @@ class job_scheduler(object):
 
                     # Change status of job in database
                     if (exit_code == 0):
-                        c.execute("UPDATE deepstyle_job SET job_status='C' WHERE id = (%s)", (completed_job.job_id,))
+                        self.safe_execute_sql("UPDATE deepstyle_job SET job_status='C' WHERE id = (%s)", True, (completed_job.job_id,))
+                        #c.execute("UPDATE deepstyle_job SET job_status='C' WHERE id = (%s)", (completed_job.job_id,))
 
                     self.logger.log.info(str(job_i) + " Exit code: %d" % exit_code)
                     break
@@ -307,7 +354,8 @@ class job_scheduler(object):
             if exit_code != 0 and completed_job is not None:
 
                 # Remove job from executing by setting status to F
-                c.execute("UPDATE deepstyle_job SET job_status='F' WHERE id = (%s)", (completed_job.job_id,))
+                self.safe_execute_sql("UPDATE deepstyle_job SET job_status='F' WHERE id = (%s)", True, (completed_job.job_id,))
+                #c.execute("UPDATE deepstyle_job SET job_status='F' WHERE id = (%s)", (completed_job.job_id,))
                 self.logger.log.error(str(job_i) + " failed to complete.")
 
             # close cursor
