@@ -301,7 +301,8 @@ class job_scheduler(object):
                 #c.execute("UPDATE deepstyle_job SET job_status='PF' WHERE id = (%s)", (job_to_run.job_id,))
                 self.safe_execute_sql("UPDATE deepstyle_job SET job_status='PF' WHERE id = (%s)", True, (job_to_run.job_id,))
 
-                self.gpu_free.put(job_to_run.gpu)
+                for free in job_to_run.gpu:
+                    self.gpu_free.put(free)
 
 
     def main(self):
