@@ -152,7 +152,7 @@ class job_scheduler(object):
                               )
 
                 # Set queue status of current row's id to be 'queued'
-                c.execute("UPDATE deepstyle_job SET job_status='P' WHERE id = %s", (row['id']))
+                c.execute("UPDATE deepstyle_job SET job_status='P' WHERE id = %s", (row['id'],))
                 new_job_exists = True
                 self.logger.log.info("Job %d set In Progress" % row['id'])
 
@@ -161,7 +161,7 @@ class job_scheduler(object):
                 self.logger.log.error("Job %d could not be set In Progress" % row['id'])
                 self.logger.log.exception(e)
                 z = self.db.cursor()
-                z.execute("UPDATE deepstyle_job SET job_status='F' WHERE id = %s", (row['id']))
+                z.execute("UPDATE deepstyle_job SET job_status='F' WHERE id = %s", (row['id'],))
 
             try:
                 row = c.fetchone()
@@ -220,7 +220,7 @@ class job_scheduler(object):
                 self.logger.log.error("Job %d could not be assigned GPU %d." % (job_to_run.job_id, job_to_run.gpu))
                 self.logger.log.exception(e)
                 c = self.db.cursor()
-                c.execute("UPDATE deepstyle_job SET job_status='PF' WHERE id = %s",            (job_to_run.job_id))
+                c.execute("UPDATE deepstyle_job SET job_status='PF' WHERE id = %s",            (job_to_run.job_id,))
                 self.gpu_free.put(job_to_run.gpu)
 
 
@@ -261,7 +261,7 @@ class job_scheduler(object):
 
                     # Change status of job in database
                     if (exit_code == 0):
-                        c.execute("UPDATE deepstyle_job SET job_status='C' WHERE id = %s", (completed_job.job_id))
+                        c.execute("UPDATE deepstyle_job SET job_status='C' WHERE id = %s", (completed_job.job_id,))
 
                     self.logger.log.info(str(job_i) + " Exit code: %d" % exit_code)
                     break
@@ -271,7 +271,7 @@ class job_scheduler(object):
             if exit_code != 0 and completed_job is not None:
 
                 # Remove job from executing by setting status to F
-                c.execute("UPDATE deepstyle_job SET job_status='F' WHERE id = %s", (completed_job.job_id))
+                c.execute("UPDATE deepstyle_job SET job_status='F' WHERE id = %s", (completed_job.job_id,))
                 self.logger.log.error(str(job_i) + " failed to complete.")
 
             # close cursor
