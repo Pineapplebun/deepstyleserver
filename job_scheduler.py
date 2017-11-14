@@ -110,6 +110,7 @@ class job_scheduler(object):
         # gpu_0, gpu_1, etc.
         for i in range(num_gpus):
             self.gpu_free.put(i)
+        self.logger.log("The number of free gpus is: " + str(self.gpu_free.qsize()))
 
     def safe_execute_sql(self, string, opts=False, opts_params=None, curs_fact=False):
         """
@@ -292,6 +293,7 @@ class job_scheduler(object):
                 job_to_run.proc = Popen(params, env=new_env)
                 self.logger.log.info("Popen worked! Job %d assigned GPU %s." % (job_to_run.job_id, job_to_run.gpu))
                 self.running_jobs.append(job_to_run)
+                self.logger.log("The number of free gpus is: " + str(self.gpu_free.qsize()))
 
             except Exception as e:
                 self.logger.log.error("Job %d could not be assigned GPU %s." % (job_to_run.job_id, job_to_run.gpu))
@@ -303,6 +305,8 @@ class job_scheduler(object):
 
                 for free in job_to_run.gpu:
                     self.gpu_free.put(free)
+
+                self.logger.log("The number of free gpus is: " + str(self.gpu_free.qsize()))
 
 
     def main(self):
@@ -340,6 +344,8 @@ class job_scheduler(object):
 
                     for gpu in completed_job.gpu:
                         self.gpu_free.put(gpu)
+
+                    self.logger.log("The number of free gpus is: " + str(self.gpu_free.qsize()))
 
                     # Change status of job in database
                     if (exit_code == 0):
