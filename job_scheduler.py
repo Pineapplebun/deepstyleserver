@@ -125,8 +125,8 @@ class job_scheduler(object):
         while row is not None:
             try:
                 self.job_queue.put(job(j_id=row['id'],
-                                  im_name1= row['input_image'], #input_row_path,
-                                  im_name2= row['style_image'], #style_row_path,
+                                  im_name1= row['input_image'],
+                                  im_name2= row['style_image'],
                                   output_name= row['output_image'],
                                   content_weight=row['content_weight'],
                                   content_blend=row['content_weight_blend'],
@@ -160,6 +160,26 @@ class job_scheduler(object):
         if new_job_exists:
             self.db.commit()
 
+    def check_enough_gpu(self):
+        """
+        Returns a job that can be run. Priorities always go to smaller jobs
+        unless enough gpus exist.
+        """
+        size = job_queue.qsize()
+        found = False
+        i = 0
+        ret = None
+        # iterate through dequeuing and enqueuing
+        while (i < size):
+            temp_job = job_queue.get()
+            if not found and (int(temp_job.width)/1000) < self.gpu_free.qsize():
+                ret = temp_job
+            else:
+                job_queue.put(temp_job)
+            i += 1
+
+        return ret
+
     def assign_gpu_and_run(self):
         """
         Add a job to the currently running list and remove from the job queue.
@@ -171,12 +191,39 @@ class job_scheduler(object):
 
         """
         if not self.gpu_free.empty():
-            job_to_run = self.job_queue.get()
-            job_to_run.gpu = self.gpu_free.get()
+
+            # Retrieve the job from the queue
+            job_to_run = self.check_enough_gpu()
+
+            if job_to_run is None:
+                return
+
+            # Floor division to get lower bound of num_gpus
+            num_gpus = int(job_to_run.width)//1000
+
+            if (int(job_to_run.width) % 1000)/1000 > 0.5:
+                num_gpus += 1
+                # This is okay because we already know that from check_enough_gpu that
+                # gpu_free's size is greater than int(job_to_run.width)/1000
+
+            for _ in range(num_gpus):
+                job_to_run.gpu = self.gpu.append(self.gpu_free.get())
 
             # Create a copy of the environemnt
             new_env = os.environ.copy()
-            new_env['CUDA_VISIBLE_DEVICES'] = str(job_to_run.gpu)
+
+            # Create the CUDA GPU string
+            gpu_string = ""
+
+            i = 0
+            while (i < len(job_to_run.gpu)):
+                if i == 0:
+                    gpu_string = gpu_string + str(job_to_run.gpu[i])
+                else:
+                    gpu_string = gpu_string + "," + str(job_to_run.gpu[i])
+                i += 1
+
+            new_env['CUDA_VISIBLE_DEVICES'] = gpu_string
 
             params = ['python',
                       '/app/neural-style/neural_style.py',
@@ -200,14 +247,14 @@ class job_scheduler(object):
             # Run the subprocess
             try:
                 job_to_run.proc = Popen(params, env=new_env)
-                self.logger.log.info("Job %d assigned GPU %d." % (job_to_run.job_id, job_to_run.gpu))
+                self.logger.log.info("Job %d assigned GPU %s." % (job_to_run.job_id, job_to_run.gpu))
                 self.running_jobs.append(job_to_run)
 
             except Exception as e:
-                self.logger.log.error("Job %d could not be assigned GPU %d." % (job_to_run.job_id, job_to_run.gpu))
+                self.logger.log.error("Job %d could not be assigned GPU %s." % (job_to_run.job_id, job_to_run.gpu))
                 self.logger.log.exception(e)
                 c = self.db.cursor()
-                c.execute("UPDATE deepstyle_job SET job_status='PF' WHERE id = (%s)",            (job_to_run.job_id,))
+                c.execute("UPDATE deepstyle_job SET job_status='PF' WHERE id = (%s)", (job_to_run.job_id,))
                 self.gpu_free.put(job_to_run.gpu)
 
 
@@ -244,7 +291,9 @@ class job_scheduler(object):
                     # It is okay to remove this job from running_jobs because it will
                     # break in this if statement anyways
                     self.running_jobs.remove(job_i)
-                    self.gpu_free.put(completed_job.gpu)
+
+                    for gpu in completed_job.gpu:
+                        self.gpu_free.put(gpu)
 
                     # Change status of job in database
                     if (exit_code == 0):
