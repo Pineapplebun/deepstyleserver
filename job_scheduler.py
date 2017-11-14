@@ -215,7 +215,7 @@ class job_scheduler(object):
         # iterate through dequeuing and enqueuing
         while (i < size):
             temp_job = self.job_queue.get()
-            if not found and (int(temp_job.width)/1000) < self.gpu_free.qsize():
+            if not found and (int(temp_job.width)/1000) + 1 < self.gpu_free.qsize():
                 ret = temp_job
             else:
                 self.job_queue.put(temp_job)
@@ -242,10 +242,10 @@ class job_scheduler(object):
                 return
 
             # Floor division to get lower bound of num_gpus
-            num_gpus = int(job_to_run.width)//1000
+            num_gpus = int(job_to_run.width)//1000 + 1
 
-            if (int(job_to_run.width) % 1000)/1000 > 0.5:
-                num_gpus += 1
+            #if (int(job_to_run.width) % 1000)/1000 >= 0.4:
+            #    num_gpus += 2
                 # This is okay because we already know that from check_enough_gpu that
                 # gpu_free's size is greater than int(job_to_run.width)/1000
 
