@@ -110,7 +110,7 @@ class job_scheduler(object):
         for i in range(num_gpus):
             self.gpu_free.put(i)
 
-    def safe_execute_sql(self, string, opts=False, opts_params=(,), curs_fact=False):
+    def safe_execute_sql(self, string, opts=False, opts_params=None, curs_fact=False):
         """
         Returns a cursor if the SQL executed successfully.
         """
@@ -208,17 +208,17 @@ class job_scheduler(object):
         Returns a job that can be run. Priorities always go to smaller jobs
         unless enough gpus exist.
         """
-        size = job_queue.qsize()
+        size = self.job_queue.qsize()
         found = False
         i = 0
         ret = None
         # iterate through dequeuing and enqueuing
         while (i < size):
-            temp_job = job_queue.get()
+            temp_job = self.job_queue.get()
             if not found and (int(temp_job.width)/1000) < self.gpu_free.qsize():
                 ret = temp_job
             else:
-                job_queue.put(temp_job)
+                self.job_queue.put(temp_job)
             i += 1
 
         return ret
