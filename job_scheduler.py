@@ -126,12 +126,11 @@ class job_scheduler(object):
                     c.execute(string)
                 else:
                     c.execute(string, opts_params)
+
                 return c
             except Exception as e:
                 self.reconnect_to_db()
             i += 1
-
-
 
     def reconnect_to_db(self):
         max_tries = 1000
@@ -140,14 +139,14 @@ class job_scheduler(object):
             try:
                 self.db = psycopg2.connect("dbname='test_db' user='test' host='db' password='test'")
                 sleep(5)
+                self.logger.info("... Reconnected!")
                 return
             except Exception as e:
                 print(e)
                 self.logger.exception(e)
                 self.logger.info("Trying to reconnect in 10 seconds ...")
             sleep(10)
-
-
+            i += 1
 
     def create_jobs_and_queue(self):
         """
@@ -312,14 +311,13 @@ class job_scheduler(object):
             # When a new job exists in the database, create a job and load
             # into the job queue.
             self.create_jobs_and_queue()
-
+            print(job_queue)
             # When a job exists in the job queue
             if not self.job_queue.empty():
-                while not self.gpu_free.empty():
-                    self.assign_gpu_and_run()
+                #while not self.gpu_free.empty():
+                self.assign_gpu_and_run()
 
             completed_job = None
-            c = self.db.cursor()
 
             # Need to set exit code to 0 since if no job then we won't exec
             # the error handling and if there is a job it won't matter.
@@ -358,8 +356,6 @@ class job_scheduler(object):
                 #c.execute("UPDATE deepstyle_job SET job_status='F' WHERE id = (%s)", (completed_job.job_id,))
                 self.logger.log.error(str(job_i) + " failed to complete.")
 
-            # close cursor
-            c.close()
 
 if __name__ == '__main__':
 
