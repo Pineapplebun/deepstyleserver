@@ -1,4 +1,5 @@
 #!/bin/sh
+sleep 10 &&
 python /app/dswebsite/manage.py makemigrations &&
 python /app/dswebsite/manage.py migrate &&
 cd dswebsite &&

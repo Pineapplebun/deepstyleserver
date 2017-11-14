@@ -22,3 +22,4 @@ COPY dswebsite /app/dswebsite
 COPY neural-style/ /app/neural-style
 COPY start_app_wrapper.sh /app
 COPY job_scheduler.py /app
+COPY print_db.py /app

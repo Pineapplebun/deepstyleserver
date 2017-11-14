@@ -349,7 +349,7 @@ class job_scheduler(object):
 
                     # Change status of job in database
                     if (exit_code == 0):
-                        self.safe_execute_sql("UPDATE deepstyle_job SET job_status='C' WHERE id = (%s)", True, (completed_job.job_id,))
+                        self.safe_execute_sql("UPDATE deepstyle_job SET job_status='C' WHERE id = (%s)", True, (str(completed_job.job_id),))
                         #c.execute("UPDATE deepstyle_job SET job_status='C' WHERE id = (%s)", (completed_job.job_id,))
 
                     self.logger.log.info(str(job_i) + " Exit code: %d" % exit_code)
