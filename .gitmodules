@@ -1,0 +1,4 @@
+[submodule "neural-style"]
+	path = neural-style
+	url = https://github.com/anishathalye/neural-style.git
+	branch = master

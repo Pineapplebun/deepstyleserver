@@ -12,10 +12,10 @@ services:
     - POSTGRES_DB=test_db
     image: postgres:latest
     ports:
-    - 5431:5432
+    - 5432:5432
     restart: always
     volumes:
-    - nvidia_driver_381.22:/usr/local/nvidia:ro
+    - nvidia_driver_384.90:/usr/local/nvidia:ro
   nginx:
     container_name: ng01
     depends_on:
@@ -33,7 +33,7 @@ services:
     - ./nginx:/etc/nginx/conf.d
     - ./dswebsite/deepstyle/static:/app/static
     - ./dswebsite/deepstyle/media:/app/media
-    - nvidia_driver_381.22:/usr/local/nvidia:ro
+    - nvidia_driver_384.90:/usr/local/nvidia:ro
   web:
     build: .
     command: bash /app/start_app_wrapper.sh
@@ -51,8 +51,8 @@ services:
     - ./dswebsite:/app/dswebsite
     - ./dswebsite/deepstyle/static:/app/static
     - ./dswebsite/deepstyle/media:/app/media
-    - nvidia_driver_381.22:/usr/local/nvidia:ro
+    - nvidia_driver_384.90:/usr/local/nvidia:ro
 version: '2'
 volumes:
-  nvidia_driver_381.22:
+  nvidia_driver_384.90:
     external: true
