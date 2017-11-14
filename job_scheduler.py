@@ -38,7 +38,7 @@ class job(object):
         self.job_id = j_id
         self.path1 = "%s/%s" % (INPUT_FILE_PATH, im_name1)
         self.path2 = "%s/%s" % (INPUT_FILE_PATH, im_name2)
-        self.output_path = "%s/job_%d_%s_%s.jpg" % (OUTPUT_FILE_PATH, j_id, im_name1, im_name2)
+        self.output_path = "%s/job_%d_%s_%s" % (OUTPUT_FILE_PATH, j_id, im_name1, im_name2)
         self.content_weight = content_weight
         self.content_blend = content_blend
         self.style_weight = style_weight
