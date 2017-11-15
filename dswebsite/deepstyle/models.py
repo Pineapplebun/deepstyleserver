@@ -32,8 +32,8 @@ class Job(models.Model):
     # input_image = models.ForeignKey(Image, blank = False, null = "False", related_name='+')
     # style_image = models.ForeignKey(Image, blank = False, null = "False",  related_name='+')
 
-    input_image = models.ImageField()
-    style_image = models.ImageField()
+    input_image = models.ImageField(blank = False, null = True)
+    style_image = models.ImageField(blank = False, null = True)
     output_image = models.CharField(max_length = 100, blank = True, null = True)
 
     # parameters for running a job
