@@ -4265,7 +4265,7 @@ textarea.materialize-textarea {
   border-bottom: 1px solid #9e9e9e;
   border-radius: 0;
   outline: none;
-  height: 3rem;
+  height: 2rem;
   width: 100%;
   font-size: 1rem;
   padding: 0;
@@ -6826,7 +6826,7 @@ nav {
   padding: 0 15%; }
 
 .form-divs {
-  margin: 20px 0;}
+  margin: 30px 0;}
 
 span ul.errorlist {
   margin: 0;

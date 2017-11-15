@@ -50,13 +50,17 @@ class Job(models.Model):
         )
     content_weight = models.FloatField(
         default = 5e0,
-        verbose_name= ('Content Weight [100 - 1000]')
+        verbose_name= ('Content Weight [~~]')
         )
-    content_weight_blend = models.FloatField(default = 1, verbose_name= ('Content Weight Blend [0.0 - 1.0]'))
-    style_weight = models.FloatField(default = 5e2, verbose_name= ('Style Weight [100 - 1000]'))
-    style_scale = models.FloatField(default = 1.0, verbose_name= ('Style Scale [100 - 1000]'))
-    learning_rate = models.FloatField(default = 1e1, verbose_name= ('Learning Rate [100 - 1000]'))
-    style_layer_weight_exp = models.FloatField(default = 1, verbose_name= ('Style Layer Weight Exp [100 - 1000]'))
+    content_weight_blend = models.FloatField(
+        default = 1,
+        verbose_name= ('Content Weight Blend [0.0 - 1.0]'),
+        validators=[MaxValueValidator(1.0, message="Value too high"), MinValueValidator(0.0, message="Value too low")],
+        )
+    style_weight = models.FloatField(default = 5e2, verbose_name= ('Style Weight [~~]'))
+    style_scale = models.FloatField(default = 1.0, verbose_name= ('Style Scale [~~]'))
+    learning_rate = models.FloatField(default = 1e1, verbose_name= ('Learning Rate [~~]'))
+    style_layer_weight_exp = models.FloatField(default = 1, verbose_name= ('Style Layer Weight Exp [~~]'))
     preserve_color = models.BooleanField(default = False)
 
     # pooling
