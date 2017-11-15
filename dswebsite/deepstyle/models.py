@@ -1,6 +1,7 @@
 from django.db import models
 from datetime import datetime
 from django.core.urlresolvers import reverse
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 # Image model for holding the image
 class Image(models.Model):
@@ -30,21 +31,32 @@ class Job(models.Model):
 
     # input_image = models.ForeignKey(Image, blank = False, null = "False", related_name='+')
     # style_image = models.ForeignKey(Image, blank = False, null = "False",  related_name='+')
-    output_image = models.CharField(max_length = 100, blank = True, null = True)
-    
+
     input_image = models.ImageField(blank = True, null = True)
     style_image = models.ImageField(blank = True, null = True)
+    output_image = models.CharField(max_length = 100, blank = True, null = True)
 
     # parameters for running a job
     # TOFIX: add more restricted limit to each param?
-    output_width = models.PositiveSmallIntegerField()
-    iterations = models.PositiveIntegerField(default = 1000)
-    content_weight = models.FloatField(default = 5e0)
-    content_weight_blend = models.FloatField(default = 1)
-    style_weight = models.FloatField(default = 5e2)
-    style_scale = models.FloatField(default = 1.0)
-    learning_rate = models.FloatField(default = 1e1)
-    style_layer_weight_exp = models.FloatField(default = 1)
+    output_width = models.PositiveSmallIntegerField(
+        default = 600,
+        verbose_name= ('Output Width [100 - 1000] (Higher width will output higher resolution image, however, at higher processing time)'),
+        validators=[MaxValueValidator(1000, message="Value too high"), MinValueValidator(100, message="Value too low")],
+        )
+    iterations = models.PositiveIntegerField(
+        default = 1000,
+        verbose_name= ('Iterations [500 - 2000] (Higher iterations might output better results, however, at higher processing time)'),
+        validators=[MaxValueValidator(2000, message="Value too high"), MinValueValidator(500, message="Value too low")],
+        )
+    content_weight = models.FloatField(
+        default = 5e0,
+        verbose_name= ('Content Weight [100 - 1000]')
+        )
+    content_weight_blend = models.FloatField(default = 1, verbose_name= ('Content Weight Blend [0.0 - 1.0]'))
+    style_weight = models.FloatField(default = 5e2, verbose_name= ('Style Weight [100 - 1000]'))
+    style_scale = models.FloatField(default = 1.0, verbose_name= ('Style Scale [100 - 1000]'))
+    learning_rate = models.FloatField(default = 1e1, verbose_name= ('Learning Rate [100 - 1000]'))
+    style_layer_weight_exp = models.FloatField(default = 1, verbose_name= ('Style Layer Weight Exp [100 - 1000]'))
     preserve_color = models.BooleanField(default = False)
 
     # pooling
@@ -52,7 +64,7 @@ class Job(models.Model):
         ('MAX', "max"),
         ('AVG', "avg")
     )
-    pooling = models.CharField(max_length = 3, choices = POOLING_OPTIONS, default = 'MAX') # max pooling is default?
+    pooling = models.CharField(max_length = 3, choices = POOLING_OPTIONS, default = 'MAX')
 
     # job status
     QUEUED = 'Q'

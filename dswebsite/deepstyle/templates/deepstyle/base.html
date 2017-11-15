@@ -34,9 +34,19 @@
 		</div>
 		<!-- NAVBAR END -->
 
-		<div class="container">
+		<div class="container main-content">
 			{% block body %}{% endblock %}
 		</div>
+
+		<!-- FOOTER -->
+		<footer class="page-footer">
+			<div class="footer-copyright">
+				<div class="container">
+				© {% now 'Y' %} LamaStyle
+				</div>
+			</div>
+		</footer>
+		<!-- FOOTER END -->
 
 		<script>
 			$(document).ready(function(){

@@ -6,28 +6,35 @@
 
 	<div class="row">
 	<h3>Job List</h3>
-	<p>***Refresh the page to get updates on job status</p>
-	{% if all_jobs %}
+	<p>*** Refresh the page to get updates on job status</p>
 
-		<table class="highlight responsible-table z-depth-1">
-			<thead>
-				<tr>
-					<th>ID</th>
-					<th>Job Name</th>
-          <th>Output Width</th>
-					<th>Style Weight</th>
-					<th>Content Weight</th>
-					<th>Job Status</th>
-					<th>Edit</th>
-				</tr>
-			</thead>
+	<table class="highlight responsible-table z-depth-1">
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Job Name</th>
+        <th>Input Image</th>
+				<th>Output Image</th>
+        <th>Output Width</th>
+				<th>Style Weight</th>
+				<th>Content Weight</th>
+				<th>Job Status</th>
+				<th>Edit</th>
+			</tr>
+		</thead>
 
-			<tbody>
+		<tbody>
+
+			{% if all_jobs %}
+
+				{% load some_tags %}
 
 				{% for job in all_jobs|dictsort:"id" %}
 				<tr>
 					<td>{{ job.id }}</td>
 					<td><a href="{% url 'deepstyle:detail' job.id %}">{{ job.job_name }}</a></td>
+					<td>{{ job.input_image.path|remove:"/app/media/" }}</td>
+					<td>{{ job.output_image.path|remove:"/app/media/" }}</td>
           <td>{{ job.output_width }}</td>
 					<td>{{ job.style_weight }}</td>
 					<td>{{ job.content_weight }}</td>
@@ -36,38 +43,24 @@
 				</tr>
 				{% endfor %}
 
-			</tbody>
-		</table>
+			{% else %}
 
-	<!-- Printing a warning when no jobs exist yet -->
-	{% else %}
-  <table class="highlight responsible-table z-depth-1">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Job Name</th>
-        <th>Output Width</th>
-        <th>Style Weight</th>
-        <th>Content Weight</th>
-        <th>Job Status</th>
-        <th>Edit</th>
-      </tr>
-    </thead>
+				<tr>
+					<td>No Jobs</td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
 
-    <tbody>
-      <tr>
-        <td>No Jobs</td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-      </tr>
-    </tbody>
-  </table>
+			{% endif %}
 
-	{% endif %}
+		</tbody>
+	</table>
 	</div>
 
 {% endblock %}

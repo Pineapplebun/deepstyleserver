@@ -25,7 +25,7 @@ SECRET_KEY = 'ku^pkk*b0g9eor-%nh=81jbpg()5&8b7&j*+-w(!tz(^4)l#s-'
 # TOFIX: SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['web', 'localhost']
+ALLOWED_HOSTS = ['web']
 
 CONTENT_TYPES = ['image', 'video']
 # 2.5MB - 2621440
