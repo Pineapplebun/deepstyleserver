@@ -2,12 +2,11 @@
 {% for field in form %}
 
 	<div class="form-divs">
-		<div>
-			<span>{{ field.error }}</span>
-		</div>
 		<label class="control-label">{{ field.label_tag }}</label>
 		<div>{{ field }}</div>
+		<div>
+			<span>{{ field.errors }}</span>
+		</div>
 	</div>
 
 {% endfor %}
-
