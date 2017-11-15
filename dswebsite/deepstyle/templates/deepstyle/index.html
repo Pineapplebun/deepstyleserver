@@ -13,6 +13,7 @@
 				<tr>
 					<th>ID</th>
 					<th>Job Name</th>
+          <th>Output Width</th>
 					<th>Style Weight</th>
 					<th>Content Weight</th>
 					<th>Job Status</th>
@@ -26,6 +27,7 @@
 				<tr>
 					<td>{{ job.id }}</td>
 					<td><a href="{% url 'deepstyle:detail' job.id %}">{{ job.job_name }}</a></td>
+          <td>{{ job.output_width }}</td>
 					<td>{{ job.style_weight }}</td>
 					<td>{{ job.content_weight }}</td>
 					<td>{{ job.get_job_status_display }}</td>
@@ -43,6 +45,7 @@
       <tr>
         <th>ID</th>
         <th>Job Name</th>
+        <th>Output Width</th>
         <th>Style Weight</th>
         <th>Content Weight</th>
         <th>Job Status</th>
@@ -53,6 +56,7 @@
     <tbody>
       <tr>
         <td>No Jobs</td>
+        <td></td>
         <td></td>
         <td></td>
         <td></td>
