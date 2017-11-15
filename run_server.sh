@@ -23,6 +23,4 @@ sudo apt install python-pip
 pip install nvidia-docker-compose
 
 # running git
-git clone https://github.com/Pineapplebun/deepstyleserver.git
-cd deepstyleserver
 git submodule update --init --recursive
