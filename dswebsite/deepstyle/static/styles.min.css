@@ -4268,7 +4268,6 @@ textarea.materialize-textarea {
   height: 3rem;
   width: 100%;
   font-size: 1rem;
-  margin: 0 0 20px 0;
   padding: 0;
   box-shadow: none;
   box-sizing: content-box;
@@ -6828,4 +6827,11 @@ nav {
 
 .form-divs {
   margin: 20px 0;}
+
+span ul.errorlist {
+  margin: 0;
+}
+span ul.errorlist li{
+  color: #e51c23;
+}
 /*# sourceMappingURL=styles.min.css.map */
