@@ -4,17 +4,17 @@
 
 	<h3>{{ job.id }} : {{ job.job_name }}</h3>
 
-	<strong>Input Image</strong>
+	<h4>Input Image</h4>
 	<img src="{{ job.input_image.url }}" alt="Input Image" width="100%">
 	<a href="{{ job.input_image.url }}" download>Download Image</a>
 
-	<strong>Style Image</strong>
+	<h4>Style Image</h4>
 	<img src="{{ job.style_image.url }}" alt="Output Image" width="100%">
 	<a href="{{ job.style_image.url }}" download>Download Image</a>
 
-	<strong>Output Image</strong>
-	<img src="{{ job.output_image.url }}" alt="Image is still being processed" width="100%">
-	<a href="{{ job.output_image.url }}" download>Download Image</a>
+	<h4>Output Image</h4>
+	<img src="{{ MEDIA_URL }}{{ job.output_image }}" alt="Image is still being processed" width="100%">
+	<a href="{{ MEDIA_URL }}{{ job.output_image }}" download>Download Image</a>
 
 	<a href="{% url 'deepstyle:EditJob' job.id %}">Edit job name and details</a>
 
