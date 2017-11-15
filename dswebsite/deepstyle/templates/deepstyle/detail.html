@@ -14,10 +14,8 @@
 
   <h4>Output Image</h4>
   {% if job.output_image %}
-	<img src="{{ MEDIA_URL }}{{ job.output_image }}" alt="Image is still being processed" height="300px">
+	<img src="{{ MEDIA_URL }}{{ job.output_image }}" alt="There is an error with your job. Please run the job again or ask your supervisor for help." height="300px">
 	<p><a href="{{ MEDIA_URL }}{{ job.output_image }}" download>Download Output Image</a></p>
-  {% elif "F" in job.job_status %}
-  <p>Your job has failed. There is no output_image. Please run the job again or ask your supervisor for help.</p>
   {% else %}
   <p>The image is still being processed</p>
   {% endif %}
