@@ -16,9 +16,6 @@
 	<h4>Output Image</h4>
 	<img src="{{ MEDIA_URL }}{{ job.output_image }}" alt="Image is still being processed" height="300px">
 	<a href="{{ MEDIA_URL }}{{ job.output_image }}" download>Download Output Image</a>
-  {% if job.job_status == 'F' %}
-  <h4>Output Image</h4>
-  <p>Your job has failed. There is no output_image. Please run the job again or ask your supervisor for help.</p>
   {% if not job.output_image %}
   <h4>Output Image</h4>
   <p>The image is still being processed</p>
@@ -39,19 +36,6 @@
 	  <li>Pooling: {{ job.pooling }}</li>
 	</ul>
 
-  
-  <!-- <ul>
-	  <li>Output Width: {% if job.output_width %}{{ job.output_width }} {% else %} Default {% endif %}</li>
-	  <li>Iterations: {% if job.iterations %}{{ job.iterations }}{% else %} Default {% endif %}</li>
-	  <li>Content Weight: {% if job.content_weight %}{{ job.content_weight }}{% else %} Default {% endif %}</li>
-	  <li>Content Weight Blend: {% if job.content_weight_blend %}{{ job.content_weight_blend }}{% else %} Default {% endif %}</li>
-	  <li>Style Weight: {% if job.style_weight %}{{ job.style_weight }}{% else %} Default {% endif %}</li>
-	  <li>Style Scale: {% if job.style_scale %}{{ job.style_scale }}{% else %} Default {% endif %}</li>
-	  <li>Learning Rate: {% if job.learning_rate %}{{ job.learning_rate }}{% else %} Default {% endif %}</li>
-	  <li>Style Layer Weight exp: {% if job.style_layer_weight_exp %}{{ job.style_layer_weight_exp }}{% else %} Default {% endif %}</li>
-	  <li>Preserve Color: {% if job.preserve_color %}{{ job.preserve_color }}{% else %} Default {% endif %}</li>
-	  <li>Pooling: {% if job.pooling %}{{ job.pooling }}{% else %} Default {% endif %}</li>
-	</ul> -->
   
 	<a href="{% url 'deepstyle:EditJob' job.id %}">Edit job name and Description</a>
 
