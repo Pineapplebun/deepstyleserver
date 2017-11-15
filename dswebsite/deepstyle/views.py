@@ -16,7 +16,7 @@ class DetailView(generic.DetailView):
 
 class CreateJob(CreateView):
     model = Job
-    fields = ['job_name', 'job_description', 'input_image', 'style_image', 'output_width', 'iterations', 'content_weight', 'content_weight_blend', 'style_weight', 'learning_rate', 'style_layer_weight_exp', 'preserve_color', 'pooling']
+    fields = ['job_name', 'job_description', 'input_image', 'style_image', 'output_width', 'iterations', 'content_weight', 'content_weight_blend', 'style_weight', 'style_scale', 'learning_rate', 'style_layer_weight_exp', 'preserve_color', 'pooling']
 
 class EditJob(UpdateView):
     model = Job
