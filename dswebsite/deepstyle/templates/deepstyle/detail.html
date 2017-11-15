@@ -6,17 +6,17 @@
 
 	<h4>Input Image</h4>
 	<img src="{{ job.input_image.url }}" alt="Input Image" height="300px">
-	<a href="{{ job.input_image.url }}" download>Download Input Image</a>
+	<p><a href="{{ job.input_image.url }}" download>Download Input Image</a></p>
 
 	<h4>Style Image</h4>
 	<img src="{{ job.style_image.url }}" alt="Output Image" height="300px">
-	<a href="{{ job.style_image.url }}" download>Download Style Image</a>
+	<p><a href="{{ job.style_image.url }}" download>Download Style Image</a></p>
 
   <h4>Output Image</h4>
   {% if job.output_image %}
 	<img src="{{ MEDIA_URL }}{{ job.output_image }}" alt="Image is still being processed" height="300px">
-	<a href="{{ MEDIA_URL }}{{ job.output_image }}" download>Download Output Image</a>
-  {% elif job.job_status == "F" %}
+	<p><a href="{{ MEDIA_URL }}{{ job.output_image }}" download>Download Output Image</a></p>
+  {% elif "F" in job.job_status %}
   <p>Your job has failed. There is no output_image. Please run the job again or ask your supervisor for help.</p>
   {% else %}
   <p>The image is still being processed</p>
