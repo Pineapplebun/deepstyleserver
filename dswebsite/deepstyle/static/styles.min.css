@@ -4245,10 +4245,6 @@ button:focus {
   outline: none;
   background-color: #5897ff; }
 
-label {
-  font-size: 0.8rem;
-  color: #9e9e9e; }
-
 /* Text Inputs + Textarea
    ========================================================================== */
 /* Style Placeholders */
@@ -6836,4 +6832,6 @@ body {
 nav {
   padding: 0 15%; }
 
+.form-divs {
+  margin: 20px 0;}
 /*# sourceMappingURL=styles.min.css.map */
