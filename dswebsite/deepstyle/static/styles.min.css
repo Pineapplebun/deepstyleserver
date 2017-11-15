@@ -4801,9 +4801,6 @@ form p:last-child {
   margin-bottom: 0; }
 
 /* Remove default checkbox */
-[type="checkbox"]:not(:checked),
-[type="checkbox"]:checked {
-  pointer-events: none; }
 
 [type="checkbox"] {
   /* checkbox aspect */ }
