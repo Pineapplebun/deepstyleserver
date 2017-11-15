@@ -4807,8 +4807,6 @@ form p:last-child {
 /* Remove default checkbox */
 [type="checkbox"]:not(:checked),
 [type="checkbox"]:checked {
-  position: absolute;
-  opacity: 0;
   pointer-events: none; }
 
 [type="checkbox"] {
@@ -5012,15 +5010,12 @@ input[type=checkbox]:not(:disabled).tabbed:focus ~ .lever::before {
 
 /* Select Field
    ========================================================================== */
-select {
-  display: none; }
 
 select.browser-default {
   display: block; }
 
 select {
   background-color: rgba(255, 255, 255, 0.9);
-  width: 100%;
   padding: 5px;
   border: 1px solid #f2f2f2;
   border-radius: 2px;
