@@ -18,7 +18,7 @@
 					<th>Style Weight</th>
 					<th>Content Weight</th>
 					<th>Job Status</th>
-					<th>Edit/Delete</th>
+					<th>Edit</th>
 				</tr>
 			</thead>
 
@@ -33,7 +33,7 @@
 					<td>{{ job.style_weight }}</td>
 					<td>{{ job.content_weight }}</td>
 					<td>{{ job.get_job_status_display }}</td>
-					<td><a href="{% url 'deepstyle:EditJob' job.id %}"><i class="small material-icons tooltipped" data-position="bottom" data-delay="10" data-tooltip="I am a tooltip">edit</i></a><a href="{% url 'deepstyle:DeleteJob' job.id %}"><i class="small material-icons">delete</i></a></td>
+					<td><a href="{% url 'deepstyle:EditJob' job.id %}"><i class="small material-icons tooltipped" data-position="bottom" data-delay="10" data-tooltip="I am a tooltip">edit</i></a></td>
 				</tr>
 				{% endfor %}
 
@@ -42,9 +42,33 @@
 
 	<!-- Printing a warning when no jobs exist yet -->
 	{% else %}
-		<script>
-			alert("There are no jobs in this application.")
-		</script>
+  <table class="highlight responsible-table z-depth-1">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Job Name</th>
+        <th>Input Image</th>
+        <th>Style Image</th>
+        <th>Style Weight</th>
+        <th>Content Weight</th>
+        <th>Job Status</th>
+        <th>Edit</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr>
+        <td>No Jobs</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
 
 	{% endif %}
 	</div>
