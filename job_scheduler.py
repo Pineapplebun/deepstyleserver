@@ -38,7 +38,7 @@ class job(object):
         self.job_id = j_id
         self.path1 = "%s/%s" % (INPUT_FILE_PATH, im_name1)
         self.path2 = "%s/%s" % (INPUT_FILE_PATH, im_name2)
-        self.output_path = "%s/job_%d_%s_%s" % (OUTPUT_FILE_PATH, j_id, im_name1, im_name2)
+        self.output_path = "%s/job_%d_%s_%s.jpg" % (OUTPUT_FILE_PATH, j_id, im_name1[:-(len(im_name1.split('.')[-1])+1)], im_name2[:-(len(im_name2.split('.')[-1])+1)])
         self.content_weight = content_weight
         self.content_blend = content_blend
         self.style_weight = style_weight
@@ -129,7 +129,7 @@ class job_scheduler(object):
                     c.execute(string)
                 else:
                     c.execute(string, opts_params)
-
+                self.db.commit()
                 return c
             except psycopg2.OperationalError as e:
                 self.reconnect_to_db()
@@ -332,7 +332,6 @@ class job_scheduler(object):
 
             # Loop will run until a job is finished
             for job_i in self.running_jobs:
-
                 # job.proc could be None if the process doesn't exist
                 # but this is mitigated since no job in running_jobs will
                 # ever have None in its proc attribute
@@ -349,8 +348,9 @@ class job_scheduler(object):
                     self.logger.log.info("The number of free gpus is: " + str(self.gpu_free.qsize()))
 
                     # Change status of job in database
-                    self.safe_execute_sql("UPDATE deepstyle_job SET job_status='C' WHERE id = (%s)", True, (completed_job.job_id,))
-                        #c.execute("UPDATE deepstyle_job SET job_status='C' WHERE id = (%s)", (completed_job.job_id,))
+                    self.safe_execute_sql("UPDATE deepstyle_job SET output_image=(%s) WHERE id = (%s)", True, [completed_job.output_path, completed_job.job_id])
+                    self.safe_execute_sql("UPDATE deepstyle_job SET job_status='C' WHERE id = (%s)", True, [completed_job.job_id])
+                    # c.execute("UPDATE deepstyle_job SET job_status='C' WHERE id = (%s)", (completed_job.job_id,))
 
                     self.logger.log.info(str(job_i) + " Exit code: %d" % exit_code)
                     break
@@ -360,7 +360,7 @@ class job_scheduler(object):
             if exit_code != 0 and completed_job is not None:
 
                 # Remove job from executing by setting status to F
-                self.safe_execute_sql("UPDATE deepstyle_job SET job_status='F' WHERE id = (%s)", True, (completed_job.job_id,))
+                self.safe_execute_sql("UPDATE deepstyle_job SET job_status='F' WHERE id = (%s)", True, [completed_job.job_id])
                 #c.execute("UPDATE deepstyle_job SET job_status='F' WHERE id = (%s)", (completed_job.job_id,))
                 self.logger.log.error(str(job_i) + " failed to complete.")
 
