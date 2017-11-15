@@ -6,17 +6,20 @@
 
 	<h4>Input Image</h4>
 	<img src="{{ job.input_image.url }}" alt="Input Image" height="300px">
-	<a href="{{ job.input_image.url }}" download>Download Image</a>
+	<a href="{{ job.input_image.url }}" download>Download Input Image</a>
 
 	<h4>Style Image</h4>
 	<img src="{{ job.style_image.url }}" alt="Output Image" height="300px">
-	<a href="{{ job.style_image.url }}" download>Download Image</a>
+	<a href="{{ job.style_image.url }}" download>Download Style Image</a>
 
+  	{% if job.output_image %}
 	<h4>Output Image</h4>
 	<img src="{{ MEDIA_URL }}{{ job.output_image }}" alt="Image is still being processed" height="300px">
-	<a href="{{ MEDIA_URL }}{{ job.output_image }}" download>Download Image</a>
-
-	<a href="{% url 'deepstyle:EditJob' job.id %}">Edit job name and details</a>
+	<a href="{{ MEDIA_URL }}{{ job.output_image }}" download>Download Output Image</a>
+  	{% else %}
+  	<h4>Output Image</h4>
+  	<p>The image is still being processed</p>
+  	{% endif %}
 
 	<hr>
 
@@ -33,8 +36,7 @@
 	  <li>Pooling: {{ pooling }}</li>
 	</ul>
 
-
-
+	<a href="{% url 'deepstyle:EditJob' job.id %}">Edit job name and Description</a>
 
 
 {% endblock %}
