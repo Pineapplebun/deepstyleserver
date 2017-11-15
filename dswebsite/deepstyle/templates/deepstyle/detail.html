@@ -5,17 +5,36 @@
 	<h3>{{ job.id }} : {{ job.job_name }}</h3>
 
 	<h4>Input Image</h4>
-	<img src="{{ job.input_image.url }}" alt="Input Image" width="100%">
+	<img src="{{ job.input_image.url }}" alt="Input Image" height="300px">
 	<a href="{{ job.input_image.url }}" download>Download Image</a>
 
 	<h4>Style Image</h4>
-	<img src="{{ job.style_image.url }}" alt="Output Image" width="100%">
+	<img src="{{ job.style_image.url }}" alt="Output Image" height="300px">
 	<a href="{{ job.style_image.url }}" download>Download Image</a>
 
 	<h4>Output Image</h4>
-	<img src="{{ MEDIA_URL }}{{ job.output_image }}" alt="Image is still being processed" width="100%">
+	<img src="{{ MEDIA_URL }}{{ job.output_image }}" alt="Image is still being processed" height="300px">
 	<a href="{{ MEDIA_URL }}{{ job.output_image }}" download>Download Image</a>
 
 	<a href="{% url 'deepstyle:EditJob' job.id %}">Edit job name and details</a>
+
+	<hr>
+
+	<ul>
+	  <li>Output Width: {{ output_width }}</li>
+	  <li>Iterations: {{ job.iterations }}</li>
+	  <li>Content Weight: {{ job.content_weight }}</li>
+	  <li>Content Weight Blend: {{ job.content_weight_blend }}</li>
+	  <li>Style Weight: {{ job.style_weight }}</li>
+	  <li>Style Scale: {{ style_scale }}</li>
+	  <li>Learning Rate: {{ job.learning_rate }}</li>
+	  <li>Style Layer Weight exp: {{ job.style_layer_weight_exp }}</li>
+	  <li>Preserve Color: {{ job.preserve_color }}</li>
+	  <li>Pooling: {{ pooling }}</li>
+	</ul>
+
+
+
+
 
 {% endblock %}
