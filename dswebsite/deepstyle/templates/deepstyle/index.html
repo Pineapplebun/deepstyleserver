@@ -23,7 +23,7 @@
 
 			<tbody>
 
-				{% for job in all_jobs %}
+				{% for job in all_jobs|dictsort:"id" %}
 				<tr>
 					<td>{{ job.id }}</td>
 					<td><a href="{% url 'deepstyle:detail' job.id %}">{{ job.job_name }}</a></td>
