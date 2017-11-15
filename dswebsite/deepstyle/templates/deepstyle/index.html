@@ -28,8 +28,8 @@
 				<tr>
 					<td>{{ job.id }}</td>
 					<td><a href="{% url 'deepstyle:detail' job.id %}">{{ job.job_name }}</a></td>
-					<td>{{ job.input_image.image_name }}</td>
-					<td>{{ job.style_image.image_name }}</td>
+					<td>{{ job.input_image.path }}</td>
+					<td>{{ job.style_image.url }}</td>
 					<td>{{ job.style_weight }}</td>
 					<td>{{ job.content_weight }}</td>
 					<td>{{ job.get_job_status_display }}</td>
