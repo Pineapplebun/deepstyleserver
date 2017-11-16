@@ -62,6 +62,10 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'dswebsite.urls'
 
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+)
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
