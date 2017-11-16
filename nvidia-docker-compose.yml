@@ -3,21 +3,6 @@ services:
     container_name: ps01
     devices:
     - /dev/nvidia0
-    - /dev/nvidia1
-    - /dev/nvidia10
-    - /dev/nvidia11
-    - /dev/nvidia12
-    - /dev/nvidia13
-    - /dev/nvidia14
-    - /dev/nvidia15
-    - /dev/nvidia2
-    - /dev/nvidia3
-    - /dev/nvidia4
-    - /dev/nvidia5
-    - /dev/nvidia6
-    - /dev/nvidia7
-    - /dev/nvidia8
-    - /dev/nvidia9
     - /dev/nvidiactl
     - /dev/nvidia-uvm
     - /dev/nvidia-uvm-tools
@@ -37,21 +22,6 @@ services:
     - web
     devices:
     - /dev/nvidia0
-    - /dev/nvidia1
-    - /dev/nvidia10
-    - /dev/nvidia11
-    - /dev/nvidia12
-    - /dev/nvidia13
-    - /dev/nvidia14
-    - /dev/nvidia15
-    - /dev/nvidia2
-    - /dev/nvidia3
-    - /dev/nvidia4
-    - /dev/nvidia5
-    - /dev/nvidia6
-    - /dev/nvidia7
-    - /dev/nvidia8
-    - /dev/nvidia9
     - /dev/nvidiactl
     - /dev/nvidia-uvm
     - /dev/nvidia-uvm-tools
@@ -72,21 +42,6 @@ services:
     - db
     devices:
     - /dev/nvidia0
-    - /dev/nvidia1
-    - /dev/nvidia10
-    - /dev/nvidia11
-    - /dev/nvidia12
-    - /dev/nvidia13
-    - /dev/nvidia14
-    - /dev/nvidia15
-    - /dev/nvidia2
-    - /dev/nvidia3
-    - /dev/nvidia4
-    - /dev/nvidia5
-    - /dev/nvidia6
-    - /dev/nvidia7
-    - /dev/nvidia8
-    - /dev/nvidia9
     - /dev/nvidiactl
     - /dev/nvidia-uvm
     - /dev/nvidia-uvm-tools
