@@ -6,7 +6,7 @@
 <div class="container main-content transparent">
 
 	{% if all_jobs %}
-	{% for job in all_jobs|dictsort:"id" %}
+	{% for job in all_jobs|dictsort:"id" reversed %}
 
 		<div class="row">
 			<div class="col s8 m8 offset-s2 offset-m2">
