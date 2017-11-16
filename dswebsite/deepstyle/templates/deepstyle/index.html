@@ -24,7 +24,7 @@
 				<th>ID</th>
 				<th>Job Name</th>
         <th>Input Image</th>
-				<th>Output Image</th>
+				<th>Style Image</th>
         <th>Output Width</th>
 				<th>Iterations</th>
 				<th>Content Weight</th>
@@ -45,7 +45,7 @@
 					<td>{{ job.id }}</td>
 					<td><a href="{% url 'deepstyle:detail' job.id %}">{{ job.job_name }}</a></td>
 					<td>{{ job.input_image.path|remove:"/app/media/" }}</td>
-					<td>{{ job.output_image.path|remove:"/app/media/" }}</td>
+					<td>{{ job.style_image.path|remove:"/app/media/" }}</td>
           <td>{{ job.output_width }}</td>
           <td>{{ job.iterations }}</td>
 					<td>{{ job.style_weight }}</td>
