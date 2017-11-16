@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'ku^pkk*b0g9eor-%nh=81jbpg()5&8b7&j*+-w(!tz(^4)l#s-'
 
 # TOFIX: SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['web', 'localhost']
 
