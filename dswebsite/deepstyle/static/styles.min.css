@@ -2513,7 +2513,7 @@ nav ul a span.badge {
     width: 85%; } }
 @media only screen and (min-width: 993px) {
   .container {
-    width: 70%; } }
+    width: 80%; } }
 
 .section {
   padding-top: 1rem;
@@ -3249,16 +3249,13 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 400;
   line-height: 1.1; }
 
-h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
-  font-weight: 700; }
-
 h1 {
   font-size: 4rem;
   line-height: 110%;
   margin: 2.1rem 0 1.68rem 0; }
 
 h2 {
-  font-size: 3.5rem;
+  font-size: 2.5rem;
   line-height: 110%;
   margin: 1.78rem 0 1.424rem 0; }
 
@@ -6817,13 +6814,30 @@ button.picker__today:focus, button.picker__clear:focus, button.picker__close:foc
   stroke-linecap: round;
   /*shape-rendering: crispEdges;*/ }
 
+
+
+body {
+  background: #fafafa;
+}
 .container.main-content {
-  margin-bottom: 40px;
-  min-height: 100vh;
+  margin: 20px auto;
+  background: white;
+  padding: 20px;
+  box-sizing: border-box;
+  min-height: 80vh;
+}
+.container.user {
+  background: white;
+  padding: 5px 20px;
+  box-sizing: border-box;
+  text-align: right;
+}
+.container.user p{
+  margin: 5px 0;
 }
 
 nav {
-  padding: 0 15%; }
+  padding: 0 10%; }
 
 .form-divs {
   margin: 30px 0;}
@@ -6833,5 +6847,76 @@ span ul.errorlist {
 }
 span ul.errorlist li{
   color: #e51c23;
+}
+
+th {
+  font-weight: 400;
+}
+
+a {
+  color: #3f51b5;
+}
+a i.small {
+  color: #607d8b;
+  font-size: 1.5rem;
+}
+hr {
+  border-bottom: 0;
+  border: none;
+  border-top: 1px solid #bdbdbd;
+  margin-bottom: 0;
+  margin-top: 30px;
+}
+
+label {
+  color: #616161;
+}
+
+.container.login {
+  min-height: 86vh;
+  padding-top: 8%;
+}
+.card.login {
+  text-align: center;
+}
+.card.login span{
+  margin-bottom: 30px !important;
+}
+.card.login input{
+  margin-bottom: 30px !important;
+}
+.row {
+  margin: 0;
+}
+.card-content {
+  padding: 10px 24px !important;
+}
+.card-title {
+  margin: 10px 0 !important;
+}
+.card-image {
+  display: flex;
+}
+.card-image img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 50%;
+}
+.card-image .images-left {
+  width: 35%;
+  height: 450px;
+}
+.card-image .images-left .image-top{
+  width: 100%;
+  height: 50%
+}
+.card-image .images-left .image-bottom{
+  width: 100%;
+  height: 50%
+}
+.card-image .image-right {
+  width: 65%;
+  height: 450px;
 }
 /*# sourceMappingURL=styles.min.css.map */

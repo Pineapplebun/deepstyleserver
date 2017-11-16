@@ -1,13 +1,17 @@
 {% extends 'deepstyle/base.html' %}
 {% block body %}
+<div class="container main-content ">
 
 	<div class="row">
 		<h3>Create/Edit Job</h3>
+		<p><a href="https://github.com/anishathalye/neural-style">Reference #1 for parameter selection</a><br>
+		<a href="https://github.com/jcjohnson/neural-style">Reference #2 for parameter selection</a></p>
 		<form action="" method = "post" enctype = "multipart/form-data">
 			{% csrf_token %}
 			{% include 'deepstyle/form-template.html' %}
-			<button type="submit">Submit</button>
+			<button class="btn waves-effect waves-light" type="submit">Submit</button>
 		</form>
 	</div>
 
+</div>
 {% endblock %}

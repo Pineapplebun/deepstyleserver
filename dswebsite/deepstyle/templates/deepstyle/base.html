@@ -16,14 +16,16 @@
 	<body>
 
 		<!-- NAVBAR -->
+
 		<div class="navbar-fixed">
 			<nav>
 				<div class="nav-wrapper">
-					<a href="{% url 'deepstyle:index' %}" class="brand-logo">LamaStyle</a>
+					<a href="/" class="brand-logo">LamaStyle</a>
 					<a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
 					<ul class="right hide-on-med-and-down">
-						<li><a href="{% url 'deepstyle:index' %}">Job List</a></li>
 						<li><a href="{% url 'deepstyle:CreateJob' %}" class="waves-effect waves-light btn-large">Create Job</a></li>
+						<li><a href="{% url 'deepstyle:index' %}">Job List</a></li>
+						<li><a href="{% url 'deepstyle:gallery' %}">Gallery</a></li>
 					</ul>
 					<ul class="side-nav" id="mobile-demo">
 						<li><a href="sass.html">Job List</a></li>
@@ -34,9 +36,17 @@
 		</div>
 		<!-- NAVBAR END -->
 
-		<div class="container main-content">
-			{% block body %}{% endblock %}
+		{% if request.user.is_authenticated %}
+		<div class="container user">
+			<p class="indigo-text text-darken-4">Logged in as:
+					<b>{{ request.user.username }}</b>
+				<a class="indigo-text text-darken-4" href="/logout/">| Log Out</a>
+			</p>
 		</div>
+		{% endif %}
+
+
+		{% block body %}{% endblock %}
 
 		<!-- FOOTER -->
 		<footer class="page-footer">

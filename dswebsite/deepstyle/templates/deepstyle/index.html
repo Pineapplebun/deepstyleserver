@@ -2,22 +2,33 @@
 
 {% block body %}
 
+<div class="container main-content ">
+
 	<!-- Printing a list of all the jobs -->
 
 	<div class="row">
-	<h3>Job List</h3>
-	<p>*** Refresh the page to get updates on job status</p>
+	<h2 class="indigo-text text-darken-4">Job List</h2>
+	<p class="indigo-text text-lighten-2">* Refresh the page to get updates on job status</p>
 
-	<table class="highlight responsible-table z-depth-1">
+	<div class="chip">Total Jobs: {{ all_jobs.count }}</div>
+	<div class="chip orange lighten-1">Jobs in Queue: {{ jobs_in_queue.count }}</div>
+	<div class="chip indigo lighten-2">Jobs in Progress: {{ jobs_in_progress.count }}</div>
+	<div class="chip green lighten-2">Jobs Completed: {{ jobs_completed.count }}</div>
+	<div class="chip red lighten-2">Jobs Failed: {{ jobs_failed.count }}</div>
+
+	<hr>
+
+	<table class="highlight responsible-table bordered">
 		<thead>
-			<tr>
+			<tr class="grey-text text-darken-2">
 				<th>ID</th>
 				<th>Job Name</th>
         <th>Input Image</th>
 				<th>Output Image</th>
         <th>Output Width</th>
-				<th>Style Weight</th>
+				<th>Iterations</th>
 				<th>Content Weight</th>
+				<th>Style Weight</th>
 				<th>Job Status</th>
 				<th>Edit</th>
 			</tr>
@@ -36,6 +47,7 @@
 					<td>{{ job.input_image.path|remove:"/app/media/" }}</td>
 					<td>{{ job.output_image.path|remove:"/app/media/" }}</td>
           <td>{{ job.output_width }}</td>
+          <td>{{ job.iterations }}</td>
 					<td>{{ job.style_weight }}</td>
 					<td>{{ job.content_weight }}</td>
 					<td>{{ job.get_job_status_display }}</td>
@@ -55,6 +67,7 @@
 					<td></td>
 					<td></td>
 					<td></td>
+					<td></td>
 				</tr>
 
 			{% endif %}
@@ -62,5 +75,5 @@
 		</tbody>
 	</table>
 	</div>
-
+</div>
 {% endblock %}

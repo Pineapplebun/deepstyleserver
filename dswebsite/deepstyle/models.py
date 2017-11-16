@@ -50,17 +50,22 @@ class Job(models.Model):
         )
     content_weight = models.FloatField(
         default = 5e0,
-        verbose_name= ('Content Weight [~~]')
+        verbose_name= ('Content Weight [Any value relative to style weight]')
         )
     content_weight_blend = models.FloatField(
         default = 1,
         verbose_name= ('Content Weight Blend [0.0 - 1.0]'),
         validators=[MaxValueValidator(1.0, message="Value too high"), MinValueValidator(0.0, message="Value too low")],
         )
-    style_weight = models.FloatField(default = 5e2, verbose_name= ('Style Weight [~~]'))
-    style_scale = models.FloatField(default = 1.0, verbose_name= ('Style Scale [~~]'))
-    learning_rate = models.FloatField(default = 1e1, verbose_name= ('Learning Rate [~~]'))
-    style_layer_weight_exp = models.FloatField(default = 1, verbose_name= ('Style Layer Weight Exp [~~]'))
+    style_weight = models.FloatField(default = 5e2, verbose_name= ('Style Weight [Any value relative to content weight]'))
+    style_blend_weights = models.FloatField(
+        default = 1,
+        verbose_name= ('Style Blend Weights [0.0 - 1.0]'),
+        validators=[MaxValueValidator(1.0, message="Value too high"), MinValueValidator(0.0, message="Value too low")],
+    )
+    style_scale = models.FloatField(default = 1.0, verbose_name= ('Style Scale [~0.5 - ~2.0]'))
+    learning_rate = models.FloatField(default = 1e1, verbose_name= ('Learning Rate [~10] (Best kept at default)'))
+    style_layer_weight_exp = models.FloatField(default = 1, verbose_name= ('Style Layer Weight Exp [Any value] (Lower value results in more detailed output)'))
     preserve_color = models.BooleanField(default = False)
 
     # pooling

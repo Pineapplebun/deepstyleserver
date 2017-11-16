@@ -7,6 +7,9 @@ urlpatterns = [
     # url for /deepstyle/
     url(r'^$', views.IndexView.as_view(), name='index'),
 
+    # url for job gallery
+    url(r'^gallery/$', views.GalleryView.as_view(), name='gallery'),
+
     # url for job pages
     url(r'^(?P<pk>[0-9]+)/$', views.DetailView.as_view(), name='detail'),
 

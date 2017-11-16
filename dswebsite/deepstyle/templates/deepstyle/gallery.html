@@ -1,0 +1,40 @@
+{% extends 'deepstyle/base.html' %}
+
+{% block body %}
+
+	<!-- Printing a list of all the jobs -->
+<div class="container main-content transparent">
+
+	{% if all_jobs %}
+	{% for job in all_jobs|dictsort:"id" %}
+
+		<div class="row">
+			<div class="col s8 m8 offset-s2 offset-m2">
+				<div class="card">
+					<div class="card-image">
+						<div class="images-left">
+							<div class="image-top">
+								<img src="{{ job.input_image.url }}" alt="Image loading or missing...">
+							</div>
+							<div class="image-bottom">
+								<img src="{{ job.style_image.url }}" alt="Image loading or missing...">
+							</div>
+						</div>
+						<div class="image-right">
+							<img src="{{ job.output_image.url }}" alt="Image loading or missing...">
+						</div>
+					</div>
+					<div class="card-content">
+						<span class="card-title">Job #{{ job.id }} : {{ job.job_name }}</span>
+						<a href="{% url 'deepstyle:detail' job.id %}">Job Details</a>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	{% endfor %}
+	{% endif %}
+
+</div>
+
+{% endblock %}

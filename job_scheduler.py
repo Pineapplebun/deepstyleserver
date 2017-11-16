@@ -17,6 +17,7 @@ content_weight : float
 content_blend : float
 style_weight : float
 style_scale : float
+style_blend : float
 style_layer_weight_exp : float
 preserve_color : bool (0 or 1)
 """
@@ -30,6 +31,7 @@ class job(object):
                  content_blend,
                  style_weight,
                  style_scale,
+                 style_blend,
                  style_layer_weight_exp,
                  iterations,
                  preserve_color,
@@ -43,6 +45,7 @@ class job(object):
         self.content_blend = content_blend
         self.style_weight = style_weight
         self.style_scale = style_scale
+        self.style_blend = style_blend
         self.style_layer_weight_exp = style_layer_weight_exp
         self.preserve_color = preserve_color
         self.width = width
@@ -174,6 +177,7 @@ class job_scheduler(object):
                                   content_blend=row['content_weight_blend'],
                                   style_weight=row['style_weight'],
                                   style_scale=row['style_scale'],
+                                  style_blend=row['style_blend_weights'],
                                   style_layer_weight_exp=row['style_layer_weight_exp'],
                                   iterations=row['iterations'],
                                   preserve_color=row['preserve_color'],
@@ -280,6 +284,7 @@ class job_scheduler(object):
                       '--style-weight', str(job_to_run.style_weight),
                       '--style-layer-weight-exp', str(job_to_run.style_layer_weight_exp),
                       '--style-scales', str(job_to_run.style_scale),
+                      '--style-blend-weights', str(job_to_run.style_blend),
                       '--iterations', str(job_to_run.iterations),
                       '--width', str(job_to_run.width),
                       '--network', VGG_LOCATION ]
