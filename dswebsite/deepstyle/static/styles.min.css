@@ -6902,6 +6902,8 @@ label {
   height: 100%;
   object-fit: cover;
   object-position: 50% 50%;
+  border: 1px solid white;
+  box-sizing: border-box;
 }
 .card-image .images-left {
   width: 35%;
