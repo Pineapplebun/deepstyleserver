@@ -32,9 +32,9 @@ class Job(models.Model):
     # input_image = models.ForeignKey(Image, blank = False, null = "False", related_name='+')
     # style_image = models.ForeignKey(Image, blank = False, null = "False",  related_name='+')
 
-    input_image = models.ImageField(blank = False, null = True)
-    style_image = models.ImageField(blank = False, null = True)
-    output_image = models.CharField(max_length = 100, blank = True, null = True)
+    input_image = models.ImageField(blank = False, null = True, max_length=500, verbose_name= ('Uplaoding large images may take a while.'))
+    style_image = models.ImageField(blank = False, null = True, max_length=500, verbose_name = ('Uploading large images may take a while.'))
+    output_image = models.CharField(max_length = 500, blank = True, null = True)
 
     # parameters for running a job
     # TOFIX: add more restricted limit to each param?
