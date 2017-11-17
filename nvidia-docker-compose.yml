@@ -3,13 +3,6 @@ services:
     container_name: ps01
     devices:
     - /dev/nvidia0
-    - /dev/nvidia1
-    - /dev/nvidia2
-    - /dev/nvidia3
-    - /dev/nvidia4
-    - /dev/nvidia5
-    - /dev/nvidia6
-    - /dev/nvidia7
     - /dev/nvidiactl
     - /dev/nvidia-uvm
     - /dev/nvidia-uvm-tools
@@ -22,20 +15,13 @@ services:
     - 5432:5432
     restart: always
     volumes:
-    - nvidia_driver_384.90:/usr/local/nvidia:ro
+    - nvidia_driver_381.22:/usr/local/nvidia:ro
   nginx:
     container_name: ng01
     depends_on:
     - web
     devices:
     - /dev/nvidia0
-    - /dev/nvidia1
-    - /dev/nvidia2
-    - /dev/nvidia3
-    - /dev/nvidia4
-    - /dev/nvidia5
-    - /dev/nvidia6
-    - /dev/nvidia7
     - /dev/nvidiactl
     - /dev/nvidia-uvm
     - /dev/nvidia-uvm-tools
@@ -47,7 +33,7 @@ services:
     - ./nginx:/etc/nginx/conf.d
     - ./dswebsite/deepstyle/static:/app/static
     - ./dswebsite/deepstyle/media:/app/media
-    - nvidia_driver_384.90:/usr/local/nvidia:ro
+    - nvidia_driver_381.22:/usr/local/nvidia:ro
   web:
     build: .
     command: bash /app/start_app_wrapper.sh
@@ -56,13 +42,6 @@ services:
     - db
     devices:
     - /dev/nvidia0
-    - /dev/nvidia1
-    - /dev/nvidia2
-    - /dev/nvidia3
-    - /dev/nvidia4
-    - /dev/nvidia5
-    - /dev/nvidia6
-    - /dev/nvidia7
     - /dev/nvidiactl
     - /dev/nvidia-uvm
     - /dev/nvidia-uvm-tools
@@ -72,8 +51,8 @@ services:
     - ./dswebsite:/app/dswebsite
     - ./dswebsite/deepstyle/static:/app/static
     - ./dswebsite/deepstyle/media:/app/media
-    - nvidia_driver_384.90:/usr/local/nvidia:ro
+    - nvidia_driver_381.22:/usr/local/nvidia:ro
 version: '2'
 volumes:
-  nvidia_driver_384.90:
+  nvidia_driver_381.22:
     external: true

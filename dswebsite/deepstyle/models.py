@@ -45,8 +45,8 @@ class Job(models.Model):
         )
     iterations = models.PositiveIntegerField(
         default = 1000,
-        verbose_name= ('Iterations [500 - 2000] (Higher iterations might output better results, however, at higher processing time)'),
-        validators=[MaxValueValidator(2000, message="Value too high"), MinValueValidator(500, message="Value too low")],
+        verbose_name= ('Iterations [500 - 3000] (Higher iterations might output better results, however, at higher processing time)'),
+        validators=[MaxValueValidator(3000, message="Value too high"), MinValueValidator(500, message="Value too low")],
         )
     content_weight = models.FloatField(
         default = 5e0,
