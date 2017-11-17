@@ -50,10 +50,8 @@ class job(object):
         self.preserve_color = preserve_color
         self.width = width
 
-        if (iterations < 2001):
-            self.iterations = iterations
-        else:
-            self.iterations = 1000
+        
+        self.iterations = iterations
         self.gpu = []
         self.proc = None
         self.finished = None
