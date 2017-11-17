@@ -40,8 +40,8 @@ class Job(models.Model):
     # TOFIX: add more restricted limit to each param?
     output_width = models.PositiveSmallIntegerField(
         default = 600,
-        verbose_name= ('Output Width [100 - 1000] (Higher width will output higher resolution image, however, at higher processing time)'),
-        validators=[MaxValueValidator(1000, message="Value too high"), MinValueValidator(100, message="Value too low")],
+        verbose_name= ('Output Width [100 - 800] (Higher width will output higher resolution image, however, at higher processing time)'),
+        validators=[MaxValueValidator(800, message="Value too high"), MinValueValidator(100, message="Value too low")],
         )
     iterations = models.PositiveIntegerField(
         default = 1000,
